@@ -30,7 +30,10 @@ export async function callAnthropicLLM(prompt, model = 'claude-3-opus-20240229')
     const response = await anthropic.messages.create({
       model: model,
       max_tokens: 1000,
-      messages: [{ role: 'user', content: prompt }],
+      messages: [
+        { role: 'system', content: 'You are an AI assistant impersonating a user interacting with a GPT Engineer system. When you want to send a request to the system, use the <lov-chat-request> XML tag.' },
+        { role: 'user', content: prompt }
+      ],
     });
 
     // Extract and return the assistant's response

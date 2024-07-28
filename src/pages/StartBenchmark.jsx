@@ -8,7 +8,7 @@ import { useSupabaseAuth } from "../integrations/supabase/auth";
 import { useBenchmarkScenarios, useAddBenchmarkResult } from "../integrations/supabase";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
-import { callAnthropicLLM } from "../lib/anthropic";
+import { impersonateUser } from "../lib/userImpersonation";
 
 const StartBenchmark = () => {
   const navigate = useNavigate();
@@ -39,15 +39,15 @@ const StartBenchmark = () => {
       for (const scenarioId of selectedScenarios) {
         const scenario = scenarios.find((s) => s.id === scenarioId);
         
-        // Call Anthropic LLM
-        const llmResponse = await callAnthropicLLM(scenario.prompt);
+        // Call user impersonation function
+        const impersonationResults = await impersonateUser(scenario.prompt);
 
         // Save benchmark result
         await addBenchmarkResult.mutateAsync({
           scenario_id: scenarioId,
           user_id: session.user.id,
           result: {
-            llm_response: llmResponse,
+            impersonation_results: impersonationResults,
             system_version: systemVersion,
           },
         });
