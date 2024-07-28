@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -28,7 +28,7 @@ const StartBenchmark = () => {
     );
   };
 
-  const handleStartBenchmark = async () => {
+  const handleStartBenchmark = useCallback(async () => {
     if (selectedScenarios.length === 0) {
       toast.error("Please select at least one scenario to run.");
       return;
@@ -77,7 +77,7 @@ const StartBenchmark = () => {
     } finally {
       setIsRunning(false);
     }
-  };
+  }, [selectedScenarios, userSecrets, scenarios, systemVersion, session, addBenchmarkResult, navigate]);
 
   if (scenariosLoading || secretsLoading) {
     return <div>Loading...</div>;
