@@ -39,7 +39,7 @@ export const useBenchmarkRun = (systemVersion) => {
         const scenario = scenarios.find((s) => s.id === scenarioId);
         
         // Call initial user impersonation function
-        const { projectId, initialRequest, messages: initialMessages, link: projectLink } = await impersonateUser(scenario.prompt, systemVersion, scenario.llm_temperature);
+        const { projectId, initialRequest, messages, link: projectLink } = await impersonateUser(scenario.prompt, systemVersion, scenario.llm_temperature);
 
         // Create a new run entry with 'paused' state
         const { data: newRun, error: createRunError } = await supabase

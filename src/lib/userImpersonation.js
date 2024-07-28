@@ -40,25 +40,6 @@ const createProject = async (description, systemVersion) => {
   return response.json();
 };
 
-// Function to send a chat message to a project
-const sendChatMessage = async (projectId, message, systemVersion) => {
-  const secrets = await getUserSecrets();
-  const gptEngineerTestToken = secrets.GPT_ENGINEER_TEST_TOKEN;
-
-  const response = await fetch(`${systemVersion}/projects/${projectId}/chat`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${gptEngineerTestToken}`,
-    },
-    body: JSON.stringify({ message, images: [], mode: 'instant' }),
-  });
-  if (!response.ok) {
-    throw new Error('Failed to send chat message');
-  }
-  return response.json();
-};
-
 // Function to handle initial user impersonation and project creation
 export const impersonateUser = async (prompt, systemVersion, temperature) => {
   try {
