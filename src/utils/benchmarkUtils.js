@@ -2,6 +2,8 @@ import { toast } from "sonner";
 import { supabase } from "../integrations/supabase";
 import { impersonateUser } from "../lib/userImpersonation";
 import { callOpenAILLM } from "../lib/anthropic";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 export const sendChatMessage = async (projectId, message, systemVersion, gptEngineerTestToken) => {
   const response = await fetch(`${systemVersion}/projects/${projectId}/chat`, {
