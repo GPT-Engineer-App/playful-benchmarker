@@ -36,8 +36,8 @@ const About = () => {
           </ul>
           <h3 className="text-2xl font-semibold mt-6 mb-2">Key Performance Dimensions</h3>
           <ul className="list-disc pl-6 space-y-2">
-            <li><strong>Coding > Debugging:</strong> Evaluates how effectively the system identifies and resolves errors it introduces.</li>
-            <li><strong>Coding > Dependencies:</strong> Assesses the system's proficiency in managing, adding, removing, and modifying dependencies.</li>
+            <li><strong>Coding &gt; Debugging:</strong> Evaluates how effectively the system identifies and resolves errors it introduces.</li>
+            <li><strong>Coding &gt; Dependencies:</strong> Assesses the system's proficiency in managing, adding, removing, and modifying dependencies.</li>
             <li><strong>Limitation Awareness:</strong> Measures how well the system recognizes its own limitations and communicates these to the user.</li>
           </ul>
           <h3 className="text-2xl font-semibold mt-6 mb-2">Future Features</h3>
