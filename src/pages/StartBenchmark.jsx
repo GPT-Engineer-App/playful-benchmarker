@@ -5,8 +5,6 @@ import { supabase } from "../integrations/supabase";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 import { callOpenAILLM } from "../lib/anthropic";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
-import { db } from "../lib/firebase";
 import ScenarioSelection from "../components/StartBenchmark/ScenarioSelection";
 import SystemVersionSelection from "../components/StartBenchmark/SystemVersionSelection";
 import StartBenchmarkButton from "../components/StartBenchmark/StartBenchmarkButton";

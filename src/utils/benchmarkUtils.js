@@ -1,6 +1,8 @@
 import { toast } from "sonner";
 import { impersonateUser } from "../lib/userImpersonation";
 import { supabase } from "../integrations/supabase";
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 export const handleSingleIteration = async (run, systemVersion, gptEngineerTestToken, updateRun, addResult, callOpenAILLM, sendChatMessage) => {
   const startTime = Date.now();
