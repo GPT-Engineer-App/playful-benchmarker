@@ -197,7 +197,7 @@ export const useUpdateBenchmarkResult = () => {
 export const useDeleteBenchmarkResult = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id) => fromSupabase(supabase.from('benchmark_results').delete().eq('id', id)),
+        mutationFn: (id) => fromSupabase.from('benchmark_results').delete().eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('benchmark_results');
         },

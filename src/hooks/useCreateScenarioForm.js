@@ -162,6 +162,8 @@ const useCreateScenarioForm = () => {
     addReviewerField,
     handleDeleteReviewer,
     handleSubmit,
+    setScenario,
+    setReviewers,
   };
 };
 
