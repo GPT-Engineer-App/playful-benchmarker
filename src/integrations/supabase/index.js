@@ -88,6 +88,7 @@ const fromSupabase = async (query) => {
 | user_id             | uuid                   | string | false    |
 | created_at          | timestamp with time zone | string | true     |
 | impersonation_failed| boolean                | boolean| false    |
+| link                | text                   | string | false    |
 
 */
 
