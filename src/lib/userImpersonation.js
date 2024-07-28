@@ -39,7 +39,7 @@ const sendChatMessage = async (projectId, message, systemVersion) => {
 };
 
 // Main function to handle user impersonation
-export const impersonateUser = async (prompt, systemVersion, apiKey) => {
+export const impersonateUser = async (prompt, systemVersion) => {
   try {
     const systemMessage = `You are an AI assistant impersonating a user interacting with a GPT Engineer system. When you want to send a request to the system, use the <lov-chat-request> XML tag. Here's an example of how you might use it:
 
@@ -51,7 +51,7 @@ Now, based on the following prompt, generate appropriate requests to the GPT Eng
 
 ${prompt}`;
 
-    const llmResponse = await callOpenAILLM(systemMessage, apiKey);
+    const llmResponse = await callOpenAILLM(systemMessage);
     const chatRequests = parseLLMResponse(llmResponse);
     
     let projectId = null;

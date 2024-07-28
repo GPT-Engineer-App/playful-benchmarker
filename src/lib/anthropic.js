@@ -1,11 +1,7 @@
 import { supabase } from '../integrations/supabase';
 
-export async function callOpenAILLM(prompt, apiKey, model = 'gpt-4') {
+export async function callOpenAILLM(prompt, model = 'gpt-4') {
   try {
-    if (!apiKey) {
-      throw new Error('OpenAI API key not provided');
-    }
-
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       throw new Error('User not authenticated');
@@ -15,7 +11,6 @@ export async function callOpenAILLM(prompt, apiKey, model = 'gpt-4') {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: model,

@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSupabaseAuth } from "../integrations/supabase/auth";
-import { useBenchmarkScenarios, useAddBenchmarkResult, useUserSecrets } from "../integrations/supabase";
+import { useBenchmarkScenarios, useAddBenchmarkResult } from "../integrations/supabase";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 import { impersonateUser } from "../lib/userImpersonation";
@@ -14,7 +14,6 @@ const StartBenchmark = () => {
   const navigate = useNavigate();
   const { session } = useSupabaseAuth();
   const { data: scenarios, isLoading: scenariosLoading } = useBenchmarkScenarios();
-  const { data: userSecrets, isLoading: secretsLoading } = useUserSecrets();
   const [selectedScenarios, setSelectedScenarios] = useState([]);
   const [systemVersion, setSystemVersion] = useState("localhost:8000");
   const [isRunning, setIsRunning] = useState(false);
@@ -34,27 +33,14 @@ const StartBenchmark = () => {
       return;
     }
 
-    if (!userSecrets || userSecrets.length === 0) {
-      toast.error("No API key found. Please set up your secrets first.");
-      return;
-    }
-
-    const secrets = JSON.parse(userSecrets[0].secret);
-    const apiKey = secrets.OPENAI_API_KEY;
-
-    if (!apiKey) {
-      toast.error("OpenAI API key not found. Please set up your secrets first.");
-      return;
-    }
-
     setIsRunning(true);
 
     try {
       for (const scenarioId of selectedScenarios) {
         const scenario = scenarios.find((s) => s.id === scenarioId);
         
-        // Call user impersonation function
-        const impersonationResults = await impersonateUser(scenario.prompt, systemVersion, apiKey);
+        // Call user impersonation function without API key
+        const impersonationResults = await impersonateUser(scenario.prompt, systemVersion);
 
         // Save benchmark result
         await addBenchmarkResult.mutateAsync({
@@ -77,9 +63,9 @@ const StartBenchmark = () => {
     } finally {
       setIsRunning(false);
     }
-  }, [selectedScenarios, userSecrets, scenarios, systemVersion, session, addBenchmarkResult, navigate]);
+  }, [selectedScenarios, scenarios, systemVersion, session, addBenchmarkResult, navigate]);
 
-  if (scenariosLoading || secretsLoading) {
+  if (scenariosLoading) {
     return <div>Loading...</div>;
   }
 
