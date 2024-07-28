@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { useAddBenchmarkScenario, useAddReview } from "../integrations/supabase";
 import { useSupabaseAuth } from "../integrations/supabase/auth";
 import { toast } from "sonner";
@@ -38,11 +39,23 @@ const CreateScenario = () => {
     setScenario((prev) => ({ ...prev, llm_model: value }));
   };
 
+  const handleLLMTemperatureChange = (value) => {
+    setScenario((prev) => ({ ...prev, llm_temperature: value[0] }));
+  };
+
   const handleReviewChange = (index, e) => {
     const { name, value } = e.target;
     setReviews((prev) => {
       const newReviews = [...prev];
       newReviews[index] = { ...newReviews[index], [name]: value };
+      return newReviews;
+    });
+  };
+
+  const handleReviewLLMTemperatureChange = (index, value) => {
+    setReviews((prev) => {
+      const newReviews = [...prev];
+      newReviews[index] = { ...newReviews[index], llm_temperature: value[0] };
       return newReviews;
     });
   };
@@ -156,15 +169,15 @@ const CreateScenario = () => {
               </Select>
             </div>
             <div>
-              <Label htmlFor="llm_temperature">LLM Temperature</Label>
-              <Input
+              <Label htmlFor="llm_temperature">LLM Temperature: {scenario.llm_temperature.toFixed(2)}</Label>
+              <Slider
                 id="llm_temperature"
-                name="llm_temperature"
-                type="number"
-                step="0.1"
-                value={scenario.llm_temperature}
-                onChange={handleScenarioChange}
-                required
+                min={0}
+                max={1}
+                step={0.01}
+                value={[scenario.llm_temperature]}
+                onValueChange={handleLLMTemperatureChange}
+                className="mt-2"
               />
             </div>
           </div>
@@ -227,15 +240,15 @@ const CreateScenario = () => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor={`review-llm-temperature-${index}`}>LLM Temperature</Label>
-                  <Input
+                  <Label htmlFor={`review-llm-temperature-${index}`}>LLM Temperature: {review.llm_temperature.toFixed(2)}</Label>
+                  <Slider
                     id={`review-llm-temperature-${index}`}
-                    name="llm_temperature"
-                    type="number"
-                    step="0.1"
-                    value={review.llm_temperature}
-                    onChange={(e) => handleReviewChange(index, e)}
-                    required
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    value={[review.llm_temperature]}
+                    onValueChange={(value) => handleReviewLLMTemperatureChange(index, value)}
+                    className="mt-2"
                   />
                 </div>
                 <div>
