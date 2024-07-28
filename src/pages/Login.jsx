@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "../integrations/supabase";
 import { toast } from "sonner";
+import Navbar from "../components/Navbar";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -32,11 +33,7 @@ const Login = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-primary text-primary-foreground p-4">
-        <div className="container mx-auto">
-          <h1 className="text-2xl font-bold">Login</h1>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <form onSubmit={handleLogin} className="max-w-md mx-auto space-y-4">

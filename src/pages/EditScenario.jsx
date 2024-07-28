@@ -1,17 +1,16 @@
 import { useEffect } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useSupabaseAuth } from "../integrations/supabase/auth";
 import ScenarioDetails from "../components/ScenarioDetails";
 import ReviewerDetails from "../components/ReviewerDetails";
 import useCreateScenarioForm from "../hooks/useCreateScenarioForm";
 import { useBenchmarkScenario, useUpdateBenchmarkScenario, useReviewers, useUpdateReviewer } from "../integrations/supabase";
 import { toast } from "sonner";
+import Navbar from "../components/Navbar";
 
 const EditScenario = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { logout } = useSupabaseAuth();
   const { data: scenarioData, isLoading: isLoadingScenario } = useBenchmarkScenario(id);
   const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
   const updateScenario = useUpdateBenchmarkScenario();
@@ -64,29 +63,13 @@ const EditScenario = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-  };
-
   if (isLoadingScenario || isLoadingReviewers) {
     return <div>Loading...</div>;
   }
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-primary text-primary-foreground p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Edit Scenario</h1>
-          <nav>
-            <ul className="flex space-x-4 items-center">
-              <li><Link to="/" className="hover:underline">Home</Link></li>
-              <li><Link to="/about" className="hover:underline">About</Link></li>
-              <li><Link to="/secrets" className="hover:underline">Secrets</Link></li>
-              <li><Button onClick={handleLogout} variant="ghost" className="h-9 px-4 py-2">Logout</Button></li>
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="space-y-6">

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -7,10 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSupabaseAuth } from "../integrations/supabase/auth";
 import { useBenchmarkScenarios } from "../integrations/supabase";
 import { toast } from "sonner";
+import Navbar from "../components/Navbar";
 
 const StartBenchmark = () => {
   const navigate = useNavigate();
-  const { session, logout } = useSupabaseAuth();
+  const { session } = useSupabaseAuth();
   const { data: scenarios, isLoading } = useBenchmarkScenarios();
   const [selectedScenarios, setSelectedScenarios] = useState([]);
   const [systemVersion, setSystemVersion] = useState("localhost:3000");
@@ -40,34 +41,13 @@ const StartBenchmark = () => {
     // navigate("/benchmark-results");
   };
 
-  const handleLogout = async () => {
-    await logout();
-    navigate("/");
-  };
-
   if (isLoading) {
     return <div>Loading scenarios...</div>;
   }
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-primary text-primary-foreground p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Start Benchmark</h1>
-          <nav>
-            <ul className="flex space-x-4 items-center">
-              <li><Link to="/" className="hover:underline">Home</Link></li>
-              <li><Link to="/about" className="hover:underline">About</Link></li>
-              {session && (
-                <>
-                  <li><Link to="/secrets" className="hover:underline">Secrets</Link></li>
-                  <li><Button onClick={handleLogout} variant="ghost" className="h-9 px-4 py-2">Logout</Button></li>
-                </>
-              )}
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">

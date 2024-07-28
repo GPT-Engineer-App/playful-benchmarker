@@ -1,38 +1,9 @@
-import { Link } from "react-router-dom";
-import { useSupabaseAuth } from "../integrations/supabase/auth";
-import { Button } from "@/components/ui/button";
+import Navbar from "../components/Navbar";
 
 const About = () => {
-  const { session, logout } = useSupabaseAuth();
-
-  const handleLogout = async () => {
-    await logout();
-  };
-
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="bg-primary text-primary-foreground p-4">
-        <div className="container mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Lovable Benchmarks</h1>
-          <nav>
-            <ul className="flex space-x-4 items-center">
-              <li><Link to="/" className="hover:underline">Home</Link></li>
-              <li><Link to="/about" className="hover:underline">About</Link></li>
-              {session ? (
-                <>
-                  <li><Link to="/secrets" className="hover:underline">Secrets</Link></li>
-                  <li><Button onClick={handleLogout} variant="ghost" className="h-9 px-4 py-2">Logout</Button></li>
-                </>
-              ) : (
-                <>
-                  <li><Link to="/login" className="hover:underline">Login</Link></li>
-                  <li><Link to="/signup" className="hover:underline">Sign Up</Link></li>
-                </>
-              )}
-            </ul>
-          </nav>
-        </div>
-      </header>
+      <Navbar />
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <h2 className="text-3xl font-bold mb-6">About Lovable Benchmarks</h2>
