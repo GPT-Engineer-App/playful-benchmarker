@@ -205,7 +205,7 @@ export const useUpdateReviewDimension = () => {
 export const useDeleteReviewDimension = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id) => fromSupabase(supabase.from('review_dimensions').delete().eq('id', id)),
+        mutationFn: (id) => fromSupabase.from('review_dimensions').delete().eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('review_dimensions');
         },
@@ -343,7 +343,7 @@ export const useUpdateRun = () => {
 export const useDeleteRun = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id) => fromSupabase(supabase.from('runs').delete().eq('id', id)),
+        mutationFn: (id) => fromSupabase.from('runs').delete().eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('runs');
         },
