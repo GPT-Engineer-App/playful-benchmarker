@@ -52,6 +52,14 @@ const CreateScenario = () => {
     });
   };
 
+  const handleReviewLLMModelChange = (index, value) => {
+    setReviews((prev) => {
+      const newReviews = [...prev];
+      newReviews[index] = { ...newReviews[index], llm_model: value };
+      return newReviews;
+    });
+  };
+
   const handleReviewLLMTemperatureChange = (index, value) => {
     setReviews((prev) => {
       const newReviews = [...prev];
@@ -68,7 +76,7 @@ const CreateScenario = () => {
         description: "",
         prompt: "",
         weight: 0,
-        llm_model: "",
+        llm_model: "gpt-4o-mini",
         llm_temperature: 0,
         run_count: 1,
       },
@@ -231,13 +239,17 @@ const CreateScenario = () => {
                 </div>
                 <div>
                   <Label htmlFor={`review-llm-model-${index}`}>LLM Model</Label>
-                  <Input
-                    id={`review-llm-model-${index}`}
-                    name="llm_model"
-                    value={review.llm_model}
-                    onChange={(e) => handleReviewChange(index, e)}
-                    required
-                  />
+                  <Select onValueChange={(value) => handleReviewLLMModelChange(index, value)} value={review.llm_model}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select LLM Model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="aws--anthropic.claude-3-5-sonnet-20240620-v1:0">
+                        aws--anthropic.claude-3-5-sonnet-20240620-v1:0
+                      </SelectItem>
+                      <SelectItem value="gpt-4o-mini">gpt-4o-mini</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor={`review-llm-temperature-${index}`}>LLM Temperature: {review.llm_temperature.toFixed(2)}</Label>
