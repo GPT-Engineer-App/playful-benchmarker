@@ -45,13 +45,9 @@ export const impersonateUser = async (prompt, systemVersion) => {
 
 <lov-chat-request>
 Create a todo app
-</lov-chat-request>
+</lov-chat-request>`;
 
-Now, based on the following prompt, generate appropriate requests to the GPT Engineer system:
-
-${prompt}`;
-
-    const llmResponse = await callOpenAILLM(systemMessage);
+    const llmResponse = await callOpenAILLM(systemMessage + "\n\nNow, based on the following prompt, generate appropriate requests to the GPT Engineer system:\n\n" + prompt);
     const chatRequests = parseLLMResponse(llmResponse);
     
     let projectId = null;
