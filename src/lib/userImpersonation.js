@@ -1,4 +1,4 @@
-import { callAnthropicLLM } from './anthropic';
+import { callOpenAILLM } from './anthropic';
 
 // Function to parse LLM response and extract special XML tags
 const parseLLMResponse = (response) => {
@@ -51,7 +51,7 @@ Now, based on the following prompt, generate appropriate requests to the GPT Eng
 
 ${prompt}`;
 
-    const llmResponse = await callAnthropicLLM(systemMessage, apiKey);
+    const llmResponse = await callOpenAILLM(systemMessage, apiKey);
     const chatRequests = parseLLMResponse(llmResponse);
     
     let projectId = null;

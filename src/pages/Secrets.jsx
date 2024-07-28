@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 
 const Secrets = () => {
-  const [anthropicApiKey, setAnthropicApiKey] = useState("");
+  const [openaiApiKey, setOpenaiApiKey] = useState("");
   const [multionApiKey, setMultionApiKey] = useState("");
   const [gptEngineerTestToken, setGptEngineerTestToken] = useState("");
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const Secrets = () => {
   useEffect(() => {
     if (existingSecrets && existingSecrets.length > 0) {
       const secrets = JSON.parse(existingSecrets[0].secret);
-      setAnthropicApiKey(secrets.ANTHROPIC_API_KEY || "");
+      setOpenaiApiKey(secrets.OPENAI_API_KEY || "");
       setMultionApiKey(secrets.MULTION_API_KEY || "");
       setGptEngineerTestToken(secrets.GPT_ENGINEER_TEST_TOKEN || "");
     }
@@ -35,7 +35,7 @@ const Secrets = () => {
     }
 
     const newSecrets = {
-      ...(anthropicApiKey && { ANTHROPIC_API_KEY: anthropicApiKey }),
+      ...(openaiApiKey && { OPENAI_API_KEY: openaiApiKey }),
       ...(multionApiKey && { MULTION_API_KEY: multionApiKey }),
       ...(gptEngineerTestToken && { GPT_ENGINEER_TEST_TOKEN: gptEngineerTestToken }),
     };
@@ -70,12 +70,12 @@ const Secrets = () => {
       <main className="flex-grow container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
           <div>
-            <Label htmlFor="anthropic-api-key">ANTHROPIC_API_KEY</Label>
+            <Label htmlFor="openai-api-key">OPENAI_API_KEY</Label>
             <Input
-              id="anthropic-api-key"
+              id="openai-api-key"
               type="password"
-              value={anthropicApiKey}
-              onChange={(e) => setAnthropicApiKey(e.target.value)}
+              value={openaiApiKey}
+              onChange={(e) => setOpenaiApiKey(e.target.value)}
             />
           </div>
           <div>

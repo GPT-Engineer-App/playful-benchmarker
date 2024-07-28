@@ -40,10 +40,10 @@ const StartBenchmark = () => {
     }
 
     const secrets = JSON.parse(userSecrets[0].secret);
-    const apiKey = secrets.ANTHROPIC_API_KEY;
+    const apiKey = secrets.OPENAI_API_KEY;
 
     if (!apiKey) {
-      toast.error("Anthropic API key not found. Please set up your secrets first.");
+      toast.error("OpenAI API key not found. Please set up your secrets first.");
       return;
     }
 
