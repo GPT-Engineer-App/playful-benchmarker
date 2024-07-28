@@ -3,6 +3,7 @@ import { useAddRun, useAddResult, useUpdateRun, useUserSecrets, useRuns } from "
 import { supabase } from "../integrations/supabase";
 import { toast } from "sonner";
 import { handleSingleIteration } from "../utils/benchmarkUtils";
+import { impersonateUser } from "../lib/userImpersonation";
 
 export const useBenchmarkRun = (systemVersion) => {
   const [isRunning, setIsRunning] = useState(false);
@@ -38,21 +39,7 @@ export const useBenchmarkRun = (systemVersion) => {
         const scenario = scenarios.find((s) => s.id === scenarioId);
         
         // Call initial user impersonation function
-        const { projectId, initialRequest, messages: initialMessages } = await impersonateUser(scenario.prompt, systemVersion, scenario.llm_temperature);
-
-        // Get the project link from the impersonateUser response
-        const projectResponse = await fetch(`${systemVersion}/projects/${projectId}`, {
-          headers: {
-            'Authorization': `Bearer ${gptEngineerTestToken}`,
-          },
-        });
-        
-        if (!projectResponse.ok) {
-          throw new Error(`Failed to fetch project details: ${projectResponse.statusText}`);
-        }
-        
-        const projectData = await projectResponse.json();
-        const projectLink = projectData.link;
+        const { projectId, initialRequest, messages: initialMessages, link: projectLink } = await impersonateUser(scenario.prompt, systemVersion, scenario.llm_temperature);
 
         // Create a new run entry with 'paused' state
         const { data: newRun, error: createRunError } = await supabase
