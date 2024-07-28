@@ -109,6 +109,10 @@ const useCreateScenarioForm = () => {
     ]);
   };
 
+  const handleDeleteReviewer = (index) => {
+    setReviewers((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!session) {
@@ -158,6 +162,7 @@ const useCreateScenarioForm = () => {
     handleReviewerLLMModelChange,
     handleReviewerLLMTemperatureChange,
     addReviewerField,
+    handleDeleteReviewer,
     handleSubmit,
   };
 };

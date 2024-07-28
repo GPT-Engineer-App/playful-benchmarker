@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSe
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 const ReviewerDetails = ({ 
   reviewer, 
@@ -14,10 +16,22 @@ const ReviewerDetails = ({
   handleReviewerChange, 
   handleReviewerDimensionChange, 
   handleReviewerLLMModelChange, 
-  handleReviewerLLMTemperatureChange 
+  handleReviewerLLMTemperatureChange,
+  handleDeleteReviewer
 }) => (
   <div className="border p-4 rounded-md space-y-2">
-    <h3 className="text-lg font-semibold">Reviewer {index + 1}</h3>
+    <div className="flex justify-between items-center">
+      <h3 className="text-lg font-semibold">Reviewer {index + 1}</h3>
+      <Button
+        variant="destructive"
+        size="sm"
+        onClick={() => handleDeleteReviewer(index)}
+        className="flex items-center"
+      >
+        <Trash2 className="h-4 w-4 mr-2" />
+        Delete
+      </Button>
+    </div>
     <div>
       <Label htmlFor={`dimension-${index}`}>Dimension</Label>
       <Select onValueChange={(value) => handleReviewerDimensionChange(index, value)} value={reviewer.dimension || "select_dimension"}>
