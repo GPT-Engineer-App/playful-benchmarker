@@ -4,7 +4,7 @@ import { impersonateUser } from '../lib/userImpersonation';
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../lib/firebase";
 
-export const sendChatMessage = async (projectId, message, systemVersion, gptEngineerTestToken) => {
+const sendChatMessage = async (projectId, message, systemVersion, gptEngineerTestToken) => {
   const response = await fetch(`${systemVersion}/projects/${projectId}/chat`, {
     method: 'POST',
     headers: {

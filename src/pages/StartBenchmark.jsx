@@ -1,20 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSupabaseAuth } from "../integrations/supabase/auth";
 import { useBenchmarkScenarios, useAddRun, useAddResult, useUpdateRun, useUserSecrets, useRuns } from "../integrations/supabase";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
-import { handleSingleIteration } from "../utils/benchmarkUtils";
-import { handleStartBenchmark } from "../utils/benchmarkUtils";
+import { handleSingleIteration, handleStartBenchmark } from "../utils/benchmarkUtils";
 import ScenarioSelector from "../components/ScenarioSelector";
 import SystemVersionSelector from "../components/SystemVersionSelector";
 
 const StartBenchmark = () => {
-  const navigate = useNavigate();
   const { session } = useSupabaseAuth();
   const { data: scenarios, isLoading: scenariosLoading } = useBenchmarkScenarios();
   const [selectedScenarios, setSelectedScenarios] = useState([]);
@@ -42,7 +36,7 @@ const StartBenchmark = () => {
     }, 5000); // Run every 5 seconds
 
     return () => clearInterval(intervalId);
-  }, [isRunning, handleSingleIteration, userSecrets, runs, updateRun, addResult, systemVersion, setIsRunning, toast]);
+  }, [isRunning, userSecrets, runs, updateRun, addResult, systemVersion]);
 
   const handleScenarioToggle = (scenarioId) => {
     setSelectedScenarios((prev) =>
