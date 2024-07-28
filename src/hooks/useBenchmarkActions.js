@@ -75,7 +75,7 @@ export const useBenchmarkActions = (userSecrets) => {
     }, 5000);
 
     return () => clearInterval(intervalId);
-  }, [isRunning, handleSingleIteration, userSecrets, runs, updateRun, addResult]);
+  }, [isRunning, userSecrets, runs, updateRun, addResult]);
 
   return { isRunning, startBenchmark };
 };
