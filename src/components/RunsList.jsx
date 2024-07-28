@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useRuns } from "../integrations/supabase";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronUp, ChevronDown, Eye } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
+import { ChevronUp, ChevronDown, Eye, ExternalLink } from "lucide-react";
 
 const RunsList = () => {
   const navigate = useNavigate();
@@ -31,6 +34,14 @@ const RunsList = () => {
 
   const handleViewResults = (id) => {
     navigate(`/run-results/${id}`);
+  };
+
+  const handleOpenLink = (link) => {
+    if (link) {
+      window.open(link, '_blank', 'noopener,noreferrer');
+    } else {
+      toast.error("No link available for this run");
+    }
   };
 
   if (isLoading) return <div>Loading runs...</div>;
@@ -65,10 +76,25 @@ const RunsList = () => {
               <TableCell>{run.project_id}</TableCell>
               <TableCell>{run.state}</TableCell>
               <TableCell>
-                <Button variant="outline" size="sm" onClick={() => handleViewResults(run.id)}>
-                  <Eye className="h-4 w-4 mr-2" />
-                  View Results
-                </Button>
+                <div className="flex space-x-2">
+                  <Button variant="outline" size="sm" onClick={() => handleViewResults(run.id)}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Results
+                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="outline" size="sm" onClick={() => handleOpenLink(run.link)}>
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Open Project
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{run.link || "No link available"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </div>
               </TableCell>
             </TableRow>
           ))}

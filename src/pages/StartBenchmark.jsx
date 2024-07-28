@@ -82,6 +82,7 @@ const StartBenchmark = () => {
           project_id: projectId,
           user_id: session.user.id,
           state: 'running',
+          link: `${systemVersion}/projects/${projectId}`, // Save the link
         });
 
         const results = [];
