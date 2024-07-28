@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { useSupabaseAuth } from "../integrations/supabase/auth";
+import ScenarioList from "../components/ScenarioList";
 
 const Index = () => {
   const { session, logout } = useSupabaseAuth();
@@ -42,16 +43,19 @@ const Index = () => {
             <p className="mb-6">
               Hello, {session.user.email}! You're logged in.
             </p>
-            <div className="space-x-4">
-              <Button asChild className="mr-4">
-                <Link to="/secrets">Manage Secrets</Link>
-              </Button>
-              <Button asChild className="mr-4">
-                <Link to="/create-scenario">Create Scenario</Link>
-              </Button>
-              <Button asChild>
-                <Link to="/create-review-dimension">Create Review Dimension</Link>
-              </Button>
+            <div className="space-y-4">
+              <div className="space-x-4">
+                <Button asChild className="mr-4">
+                  <Link to="/secrets">Manage Secrets</Link>
+                </Button>
+                <Button asChild className="mr-4">
+                  <Link to="/create-scenario">Create Scenario</Link>
+                </Button>
+                <Button asChild>
+                  <Link to="/create-review-dimension">Create Review Dimension</Link>
+                </Button>
+              </div>
+              <ScenarioList />
             </div>
           </div>
         ) : (
