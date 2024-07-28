@@ -217,7 +217,11 @@ export const useReviewer = (id) => useQuery({
 export const useAddReviewer = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newReviewer) => fromSupabase(supabase.from('reviewers').insert([newReviewer])),
+        mutationFn: async (newReviewer) => {
+            const { data, error } = await supabase.from('reviewers').insert([newReviewer]).select();
+            if (error) throw error;
+            return data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries('reviewers');
         },
