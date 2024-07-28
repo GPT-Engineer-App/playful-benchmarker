@@ -7,7 +7,7 @@ import Signup from "./pages/Signup.jsx";
 import CreateScenario from "./pages/CreateScenario.jsx";
 import CreateReviewDimension from "./pages/CreateReviewDimension.jsx";
 import EditScenario from "./pages/EditScenario.jsx";
-import StartBenchmark from "./pages/StartBenchmark.jsx";
+import StartBenchmark from "./components/StartBenchmark/StartBenchmark.jsx";
 
 /**
  * Central place for defining the navigation items. Used for navigation components and routing.
