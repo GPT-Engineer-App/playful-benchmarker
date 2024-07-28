@@ -27,6 +27,13 @@ const StartBenchmark = () => {
     );
   };
 
+  const ensureHttpPrefix = (url) => {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return `http://${url}`;
+    }
+    return url;
+  };
+
   const handleStartBenchmark = useCallback(async () => {
     if (selectedScenarios.length === 0) {
       toast.error("Please select at least one scenario to run.");
@@ -39,8 +46,8 @@ const StartBenchmark = () => {
       for (const scenarioId of selectedScenarios) {
         const scenario = scenarios.find((s) => s.id === scenarioId);
         
-        // Call user impersonation function without API key
-        const impersonationResults = await impersonateUser(scenario.prompt, systemVersion);
+        // Call user impersonation function with ensured http prefix
+        const impersonationResults = await impersonateUser(scenario.prompt, ensureHttpPrefix(systemVersion));
 
         // Save benchmark result
         await addBenchmarkResult.mutateAsync({

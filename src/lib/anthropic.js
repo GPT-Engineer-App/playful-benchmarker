@@ -7,7 +7,7 @@ export async function callOpenAILLM(prompt, model = 'gpt-4') {
       throw new Error('User not authenticated');
     }
 
-    const systemVersion = import.meta.env.VITE_SYSTEM_VERSION || 'localhost:8000';
+    const systemVersion = import.meta.env.VITE_SYSTEM_VERSION || 'http://localhost:8000';
 
     const response = await fetch(`${systemVersion}/openai/chat/completions`, {
       method: 'POST',

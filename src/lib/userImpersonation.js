@@ -10,7 +10,7 @@ const parseLLMResponse = (response) => {
 
 // Function to create a new project
 const createProject = async (description, systemVersion) => {
-  const response = await fetch(`http://${systemVersion}/projects`, {
+  const response = await fetch(`${systemVersion}/projects`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -25,7 +25,7 @@ const createProject = async (description, systemVersion) => {
 
 // Function to send a chat message to a project
 const sendChatMessage = async (projectId, message, systemVersion) => {
-  const response = await fetch(`http://${systemVersion}/projects/${projectId}/chat`, {
+  const response = await fetch(`${systemVersion}/projects/${projectId}/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
