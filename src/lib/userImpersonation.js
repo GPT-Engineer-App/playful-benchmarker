@@ -41,7 +41,7 @@ const createProject = async (description, systemVersion) => {
 };
 
 // Function to send a chat message to a project
-const sendChatMessage = async (projectId, message, systemVersion) => {
+export const sendChatMessage = async (projectId, message, systemVersion) => {
   const secrets = await getUserSecrets();
   const gptEngineerTestToken = secrets.GPT_ENGINEER_TEST_TOKEN;
 

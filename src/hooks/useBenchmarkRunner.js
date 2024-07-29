@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { callOpenAILLM } from '../lib/anthropic';
-import { sendChatMessage } from '../lib/userImpersonation';
+import { sendChatMessage, impersonateUser } from '../lib/userImpersonation';
 
 const useBenchmarkRunner = (systemVersion) => {
   const [isRunning, setIsRunning] = useState(false);
