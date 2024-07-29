@@ -6,20 +6,23 @@ import ScenarioSelection from "../components/ScenarioSelection";
 import SystemVersionSelection from "../components/SystemVersionSelection";
 import StartBenchmarkButton from "../components/StartBenchmarkButton";
 import useBenchmarkLogic from "../hooks/useBenchmarkLogic";
+import { useIncompleteRuns } from "../integrations/supabase";
 
 const StartBenchmark = () => {
   const { session } = useSupabaseAuth();
   const { data: scenarios, isLoading: scenariosLoading } = useBenchmarkScenarios();
   const { data: userSecrets } = useUserSecrets();
+  const { data: incompleteRuns, isLoading: incompleteRunsLoading } = useIncompleteRuns();
   const [selectedScenarios, setSelectedScenarios] = useState([]);
   const [systemVersion, setSystemVersion] = useState("http://localhost:8000");
 
   const {
     isRunning,
-    handleStartBenchmark
+    handleStartBenchmark,
+    handleContinueBenchmark
   } = useBenchmarkLogic(selectedScenarios, scenarios, systemVersion, session, userSecrets);
 
-  if (scenariosLoading) {
+  if (scenariosLoading || incompleteRunsLoading) {
     return <div>Loading...</div>;
   }
 
@@ -29,6 +32,16 @@ const StartBenchmark = () => {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
+          {incompleteRuns && incompleteRuns.length > 0 && (
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold mb-2">Incomplete Runs</h3>
+              <p>You have {incompleteRuns.length} incomplete benchmark runs.</p>
+              <Button onClick={() => handleContinueBenchmark(incompleteRuns)} className="mt-2">
+                Continue Incomplete Runs
+              </Button>
+            </div>
+          )}
+
           <ScenarioSelection
             scenarios={scenarios}
             selectedScenarios={selectedScenarios}

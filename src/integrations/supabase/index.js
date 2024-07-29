@@ -305,7 +305,7 @@ export const useDeleteResult = () => {
 // Runs
 export const useRuns = () => useQuery({
     queryKey: ['runs'],
-    queryFn: () => fromSupabase(supabase.from('runs').select('*').order('created_at', { ascending: false }).limit(10)),
+    queryFn: () => fromSupabase(supabase.from('runs').select('*').order('created_at', { ascending: false })),
 });
 
 export const useRun = (id) => useQuery({
@@ -317,10 +317,7 @@ export const useRun = (id) => useQuery({
 export const useAddRun = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newRun) => fromSupabase(supabase.from('runs').insert([{
-            ...newRun,
-            state: newRun.state || 'running'
-        }])),
+        mutationFn: (newRun) => fromSupabase(supabase.from('runs').insert([newRun]).select()),
         onSuccess: () => {
             queryClient.invalidateQueries('runs');
         },
@@ -330,15 +327,17 @@ export const useAddRun = () => {
 export const useUpdateRun = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('runs').update({
-            ...updateData,
-            state: updateData.state || 'running'
-        }).eq('id', id)),
+        mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('runs').update(updateData).eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('runs');
         },
     });
 };
+
+export const useIncompleteRuns = () => useQuery({
+    queryKey: ['incomplete_runs'],
+    queryFn: () => fromSupabase(supabase.from('runs').select('*').eq('state', 'paused').order('created_at', { ascending: false })),
+});
 
 export const useDeleteRun = () => {
     const queryClient = useQueryClient();

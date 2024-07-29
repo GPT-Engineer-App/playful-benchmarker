@@ -1,6 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { toast } from "sonner";
-import { useAddRun, useAddResult, useUpdateRun } from "../integrations/supabase";
+import { useAddRun, useAddResult, useUpdateRun, useRuns } from "../integrations/supabase";
 import { supabase } from "../integrations/supabase";
 import { impersonateUser } from "../lib/userImpersonation";
 
@@ -9,6 +9,40 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session,
   const addRun = useAddRun();
   const addResult = useAddResult();
   const updateRun = useUpdateRun();
+  const { data: existingRuns, refetch: refetchRuns } = useRuns();
+
+  useEffect(() => {
+    if (existingRuns) {
+      const incompleteRuns = existingRuns.filter(run => run.state === 'paused');
+      if (incompleteRuns.length > 0) {
+        toast.info(`You have ${incompleteRuns.length} incomplete benchmark runs. Would you like to continue them?`, {
+          action: {
+            label: 'Continue',
+            onClick: () => handleContinueBenchmark(incompleteRuns),
+          },
+        });
+      }
+    }
+  }, [existingRuns]);
+
+  const handleContinueBenchmark = useCallback(async (incompleteRuns) => {
+    setIsRunning(true);
+    try {
+      for (const run of incompleteRuns) {
+        // Implement the logic to continue the run
+        // This might involve fetching the scenario, calling impersonateUser again, etc.
+        // Update the run state when it's completed
+        await updateRun.mutateAsync({ id: run.id, state: 'completed' });
+      }
+      toast.success("All incomplete benchmarks have been continued and completed!");
+    } catch (error) {
+      console.error("Error continuing benchmarks:", error);
+      toast.error("An error occurred while continuing the benchmarks. Please try again.");
+    } finally {
+      setIsRunning(false);
+      refetchRuns();
+    }
+  }, [updateRun, refetchRuns]);
 
   const handleStartBenchmark = useCallback(async () => {
     if (selectedScenarios.length === 0) {
@@ -38,19 +72,16 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session,
         // Call initial user impersonation function
         const { projectId, initialRequest, messages: initialMessages } = await impersonateUser(scenario.prompt, systemVersion, scenario.llm_temperature);
 
-        // Create a new run entry with 'running' state
-        const { data: newRun, error: createRunError } = await supabase
-          .from('runs')
-          .insert({
-            scenario_id: scenarioId,
-            system_version: systemVersion,
-            project_id: projectId,
-            user_id: session.user.id,
-            link: `${systemVersion}/projects/${projectId}`,
-            state: 'paused'  // Create the run in paused state
-          })
-          .select()
-          .single();
+        // Create a new run entry with 'paused' state
+        const { data: newRun, error: createRunError } = await addRun.mutateAsync({
+          scenario_id: scenarioId,
+          system_version: systemVersion,
+          project_id: projectId,
+          user_id: session.user.id,
+          link: `${systemVersion}/projects/${projectId}`,
+          state: 'paused',
+          initial_messages: initialMessages
+        });
 
         if (createRunError) throw new Error(`Failed to create run: ${createRunError.message}`);
 
@@ -61,13 +92,16 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session,
     } catch (error) {
       console.error("Error starting benchmark:", error);
       toast.error("An error occurred while starting the benchmark. Please try again.");
+    } finally {
       setIsRunning(false);
+      refetchRuns();
     }
-  }, [selectedScenarios, scenarios, systemVersion, session, addRun, addResult, userSecrets]);
+  }, [selectedScenarios, scenarios, systemVersion, session, addRun, refetchRuns]);
 
   return {
     isRunning,
-    handleStartBenchmark
+    handleStartBenchmark,
+    handleContinueBenchmark
   };
 };
 
