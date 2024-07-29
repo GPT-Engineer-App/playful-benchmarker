@@ -47,25 +47,14 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session,
             project_id: projectId,
             user_id: session.user.id,
             link: `${systemVersion}/projects/${projectId}`,
-            state: 'running'
+            state: 'paused'  // Create the run in paused state
           })
           .select()
           .single();
 
         if (createRunError) throw new Error(`Failed to create run: ${createRunError.message}`);
 
-        toast.success(`Benchmark started for scenario: ${scenario.name}`);
-
-        // Pause the run immediately after creation
-        const { error: pauseRunError } = await supabase
-          .from('runs')
-          .update({ state: 'paused' })
-          .eq('id', newRun.id);
-
-        if (pauseRunError) {
-          console.error(`Failed to pause run: ${pauseRunError.message}`);
-          // We don't throw here to allow other scenarios to proceed
-        }
+        toast.success(`Benchmark created and paused for scenario: ${scenario.name}`);
       }
 
       toast.success("All benchmarks started successfully!");
