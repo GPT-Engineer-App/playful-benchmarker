@@ -5,9 +5,8 @@ const StartBenchmarkButton = ({ isRunning, onClick }) => {
     <Button 
       onClick={onClick} 
       className="mt-8 w-full"
-      disabled={isRunning}
     >
-      {isRunning ? "Running Benchmark..." : "Start Benchmark"}
+      {isRunning ? "Stop Benchmark" : "Start Benchmark"}
     </Button>
   );
 };
