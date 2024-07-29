@@ -1,9 +1,18 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useSupabaseAuth } from "../integrations/supabase/auth";
+import { useBenchmarkScenarios, useAddRun, useAddResult, useUpdateRun, useUserSecrets, useRuns } from "../integrations/supabase";
+import { supabase } from "../integrations/supabase";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
-import ScenarioSelection from "../components/ScenarioSelection";
-import SystemVersionSelection from "../components/SystemVersionSelection";
-import { useBenchmarkRunner } from "../hooks/useBenchmarkRunner";
+import { impersonateUser } from "../lib/userImpersonation";
+import { callOpenAILLM } from "../lib/anthropic";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 const StartBenchmark = () => {
   const navigate = useNavigate();
@@ -39,37 +48,33 @@ const StartBenchmark = () => {
       return;
     }
 
-    const pausedRun = runs.find(run => run.state === "paused");
-    if (!pausedRun) {
-      console.log("No paused run found");
+    const availableRun = runs.find(run => run.state === "paused" || run.state === "running");
+    if (!availableRun) {
+      console.log("No available run found");
       return;
     }
 
-    // Try to start the paused run
-    const { data: runStarted, error: startError } = await supabase
-      .rpc('start_paused_run', { run_id: pausedRun.id });
-
-    if (startError) {
-      console.error("Error starting run:", startError);
-      return;
-    }
-
-    if (!runStarted) {
-      // Check if the run timed out
-      const { data: runData } = await supabase
+    // If the run is paused, try to start it
+    if (availableRun.state === "paused") {
+      const { data: runStarted, error: startError } = await supabase
         .from('runs')
-        .select('state')
-        .eq('id', pausedRun.id)
+        .update({ state: 'running' })
+        .eq('id', availableRun.id)
+        .select()
         .single();
 
-      if (runData.state === 'timed_out') {
-        console.log("Run timed out:", pausedRun.id);
-        toast.error(`Run ${pausedRun.id} timed out`);
-      } else {
-        console.log("Run was not in 'paused' state, skipping");
+      if (startError) {
+        console.error("Error starting run:", startError);
+        return;
       }
-      return;
+
+      if (!runStarted) {
+        console.log("Failed to start run:", availableRun.id);
+        return;
+      }
     }
+
+    // At this point, the run should be in 'running' state
 
     const startTime = Date.now();
 
@@ -209,21 +214,7 @@ const StartBenchmark = () => {
         // Call initial user impersonation function
         const { projectId, initialRequest, messages: initialMessages } = await impersonateUser(scenario.prompt, systemVersion, scenario.llm_temperature);
 
-        // Get the project link from the impersonateUser response
-        const projectResponse = await fetch(`${systemVersion}/projects/${projectId}`, {
-          headers: {
-            'Authorization': `Bearer ${gptEngineerTestToken}`,
-          },
-        });
-        
-        if (!projectResponse.ok) {
-          throw new Error(`Failed to fetch project details: ${projectResponse.statusText}`);
-        }
-        
-        const projectData = await projectResponse.json();
-        const projectLink = projectData.link;
-
-        // Create a new run entry with 'paused' state
+        // Create a new run entry with 'running' state
         const { data: newRun, error: createRunError } = await supabase
           .from('runs')
           .insert({
@@ -231,24 +222,25 @@ const StartBenchmark = () => {
             system_version: systemVersion,
             project_id: projectId,
             user_id: session.user.id,
-            link: projectLink,
-            state: 'paused'
+            link: `${systemVersion}/projects/${projectId}`,
+            state: 'running'
           })
           .select()
           .single();
 
         if (createRunError) throw new Error(`Failed to create run: ${createRunError.message}`);
 
-        // Start the paused run
-        const { data: startedRun, error: startRunError } = await supabase
-          .rpc('start_paused_run', { run_id: newRun.id });
+        toast.success(`Benchmark started for scenario: ${scenario.name}`);
 
-        if (startRunError) throw new Error(`Failed to start run: ${startRunError.message}`);
+        // Pause the run immediately after creation
+        const { error: pauseRunError } = await supabase
+          .from('runs')
+          .update({ state: 'paused' })
+          .eq('id', newRun.id);
 
-        if (startedRun) {
-          toast.success(`Benchmark started for scenario: ${scenario.name}`);
-        } else {
-          toast.warning(`Benchmark created but not started for scenario: ${scenario.name}`);
+        if (pauseRunError) {
+          console.error(`Failed to pause run: ${pauseRunError.message}`);
+          // We don't throw here to allow other scenarios to proceed
         }
       }
 
@@ -264,18 +256,49 @@ const StartBenchmark = () => {
     return <div>Loading...</div>;
   }
 
-import Navbar from "../components/Navbar";
-import BenchmarkForm from "../components/BenchmarkForm";
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
 
-const StartBenchmark = () => (
-  <div className="flex flex-col min-h-screen">
-    <Navbar />
-    <main className="flex-grow container mx-auto px-4 py-8">
-      <div className="max-w-2xl mx-auto">
-        <BenchmarkForm />
-      </div>
-    </main>
-  </div>
-);
+      <main className="flex-grow container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          <h2 className="text-2xl font-bold mb-4">Select Scenarios</h2>
+          <div className="space-y-4 mb-8">
+            {scenarios.map((scenario) => (
+              <div key={scenario.id} className="flex items-center space-x-2">
+                <Checkbox
+                  id={scenario.id}
+                  checked={selectedScenarios.includes(scenario.id)}
+                  onCheckedChange={() => handleScenarioToggle(scenario.id)}
+                />
+                <Label htmlFor={scenario.id}>{scenario.name}</Label>
+              </div>
+            ))}
+          </div>
+
+          <h2 className="text-2xl font-bold mb-4">Select System Version</h2>
+          <Select value={systemVersion} onValueChange={setSystemVersion}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select system version" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="http://localhost:8000">http://localhost:8000</SelectItem>
+              <SelectItem value="https://api.gpt-engineer.com">https://api.gpt-engineer.com</SelectItem>
+              {/* Add more options here in the future */}
+            </SelectContent>
+          </Select>
+
+          <Button 
+            onClick={handleStartBenchmark} 
+            className="mt-8 w-full"
+            disabled={isRunning}
+          >
+            {isRunning ? "Running Benchmark..." : "Start Benchmark"}
+          </Button>
+        </div>
+      </main>
+    </div>
+  );
+};
 
 export default StartBenchmark;
