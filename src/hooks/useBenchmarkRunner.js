@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react';
-import { supabase } from '../integrations/supabase';
 import { supabase, useUpdateRun, useAddResult } from '../integrations/supabase';
 import { toast } from 'sonner';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
