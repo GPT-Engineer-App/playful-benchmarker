@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../integrations/supabase';
-import { useUpdateRun, useAddResult } from '../integrations/supabase';
+import { supabase, useUpdateRun, useAddResult } from '../integrations/supabase';
 import { toast } from 'sonner';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -35,11 +35,7 @@ const useBenchmarkRunner = (systemVersion) => {
     // If the run is paused, try to start it
     if (availableRun.state === "paused") {
       const { data: runStarted, error: startError } = await supabase
-        .from('runs')
-        .update({ state: 'running' })
-        .eq('id', availableRun.id)
-        .select()
-        .single();
+        .rpc('start_paused_run', { run_id: availableRun.id });
 
       if (startError) {
         console.error("Error starting run:", startError);
@@ -47,7 +43,7 @@ const useBenchmarkRunner = (systemVersion) => {
       }
 
       if (!runStarted) {
-        console.log("Failed to start run:", availableRun.id);
+        console.log("Failed to start run (it may no longer be in 'paused' state):", availableRun.id);
         return;
       }
     }
