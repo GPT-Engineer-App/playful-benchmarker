@@ -16,7 +16,7 @@ const StartBenchmark = () => {
   const { isRunning, handleStartBenchmark } = useBenchmarkLogic(selectedScenarios, scenarios, systemVersion, session);
 
   if (scenariosLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading scenarios...</div>;
   }
 
   return (

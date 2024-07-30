@@ -1,18 +1,24 @@
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import { useAddRun, useAddResult, useUpdateRun } from "../integrations/supabase";
+import { useAddRun, useAddResult, useUpdateRun, useUserSecrets } from "../integrations/supabase";
 import { supabase } from "../integrations/supabase";
 import { impersonateUser } from "../lib/userImpersonation";
 
-const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session, userSecrets) => {
+const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session) => {
   const [isRunning, setIsRunning] = useState(false);
   const addRun = useAddRun();
   const addResult = useAddResult();
   const updateRun = useUpdateRun();
+  const { data: userSecrets, isLoading: isLoadingSecrets } = useUserSecrets();
 
   const handleStartBenchmark = useCallback(async () => {
     if (selectedScenarios.length === 0) {
       toast.error("Please select at least one scenario to run.");
+      return;
+    }
+
+    if (isLoadingSecrets) {
+      toast.error("Loading user secrets. Please try again in a moment.");
       return;
     }
 
@@ -63,7 +69,7 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session,
       toast.error("An error occurred while starting the benchmark. Please try again.");
       setIsRunning(false);
     }
-  }, [selectedScenarios, scenarios, systemVersion, session, addRun, addResult, userSecrets]);
+  }, [selectedScenarios, scenarios, systemVersion, session, addRun, addResult, userSecrets, isLoadingSecrets]);
 
   return {
     isRunning,
