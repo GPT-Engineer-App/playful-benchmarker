@@ -7,11 +7,13 @@ import { callOpenAILLM } from '../lib/anthropic';
 import { sendChatMessage, impersonateUser } from '../lib/userImpersonation';
 
 const useBenchmarkRunner = (systemVersion) => {
+  console.log('useBenchmarkRunner initialized with systemVersion:', systemVersion);
   const [isRunning, setIsRunning] = useState(false);
   const updateRun = useUpdateRun();
   const addResult = useAddResult();
 
   const handleSingleIteration = useCallback(async (gptEngineerTestToken) => {
+    console.log('Starting single iteration');
     const { data: runs, error: runsError } = await supabase
       .from('runs')
       .select('*')
@@ -30,9 +32,11 @@ const useBenchmarkRunner = (systemVersion) => {
     }
 
     const availableRun = runs[0];
+    console.log('Available run:', availableRun);
 
     // If the run is paused, try to start it
     if (availableRun.state === "paused") {
+      console.log('Attempting to start paused run:', availableRun.id);
       const { data: runStarted, error: startError } = await supabase
         .rpc('start_paused_run', { run_id: availableRun.id });
 
@@ -45,14 +49,17 @@ const useBenchmarkRunner = (systemVersion) => {
         console.log("Failed to start run (it may no longer be in 'paused' state):", availableRun.id);
         return;
       }
+      console.log('Run started successfully');
     }
 
     // At this point, the run should be in 'running' state
 
     const startTime = Date.now();
+    console.log('Starting iteration at:', new Date(startTime).toISOString());
 
     try {
       // Fetch project messages from Firestore
+      console.log('Fetching project messages from Firestore');
       const messagesRef = collection(db, `project/${availableRun.project_id}/trajectory`);
       const q = query(messagesRef, orderBy("timestamp", "asc"));
       const querySnapshot = await getDocs(q);
@@ -60,11 +67,15 @@ const useBenchmarkRunner = (systemVersion) => {
         role: doc.data().sender === "human" ? "assistant" : "user",
         content: doc.data().content
       }));
+      console.log('Fetched messages:', messages);
 
       // Call OpenAI to get next user impersonation action
+      console.log('Calling OpenAI for next action');
       const nextAction = await callOpenAILLM(messages, 'gpt-4o', availableRun.llm_temperature);
+      console.log('Next action:', nextAction);
 
       if (nextAction.includes("<lov-scenario-finished/>")) {
+        console.log('Scenario finished, updating run state to completed');
         await updateRun.mutateAsync({
           id: availableRun.id,
           state: 'completed',
@@ -79,11 +90,15 @@ const useBenchmarkRunner = (systemVersion) => {
       }
 
       const chatRequest = chatRequestMatch[1].trim();
+      console.log('Extracted chat request:', chatRequest);
 
       // Call the chat endpoint
+      console.log('Sending chat message');
       const chatResponse = await sendChatMessage(availableRun.project_id, chatRequest, systemVersion, gptEngineerTestToken);
+      console.log('Chat response:', chatResponse);
 
       // Add result
+      console.log('Adding result to database');
       await addResult.mutateAsync({
         run_id: availableRun.id,
         reviewer_id: null,
@@ -93,6 +108,7 @@ const useBenchmarkRunner = (systemVersion) => {
         },
       });
 
+      console.log('Iteration completed successfully');
       toast.success("Iteration completed successfully");
     } catch (error) {
       console.error("Error during iteration:", error);
@@ -100,8 +116,10 @@ const useBenchmarkRunner = (systemVersion) => {
     } finally {
       const endTime = Date.now();
       const timeUsage = Math.round((endTime - startTime) / 1000); // Convert to seconds
+      console.log(`Iteration completed in ${timeUsage} seconds`);
 
       // Update the total_time_usage in Supabase
+      console.log('Updating total time usage');
       const { data, error } = await supabase
         .rpc('update_run_time_usage', { 
           run_id: availableRun.id, 
@@ -111,6 +129,7 @@ const useBenchmarkRunner = (systemVersion) => {
       if (error) console.error('Error updating time usage:', error);
 
       // Check if the run has timed out
+      console.log('Checking if run has timed out');
       const { data: runData } = await supabase
         .from('runs')
         .select('state')
@@ -118,11 +137,14 @@ const useBenchmarkRunner = (systemVersion) => {
         .single();
 
       if (runData.state !== 'timed_out') {
+        console.log('Run not timed out, updating state to paused');
         // Update run state back to 'paused' only if it hasn't timed out
         await updateRun.mutateAsync({
           id: availableRun.id,
           state: 'paused',
         });
+      } else {
+        console.log('Run has timed out');
       }
     }
   }, [updateRun, addResult, systemVersion]);
