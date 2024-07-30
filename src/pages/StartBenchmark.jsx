@@ -15,6 +15,7 @@ const StartBenchmark = () => {
   const [systemVersion, setSystemVersion] = useState("http://localhost:8000");
 
   const { isRunning, startRunner, stopRunner } = useBenchmarkRunner(systemVersion);
+  const addRun = useAddRun();
 
   if (scenariosLoading) {
     return <div>Loading...</div>;
@@ -27,9 +28,19 @@ const StartBenchmark = () => {
     }
 
     try {
-      // Start the benchmark runner
-      await startRunner(selectedScenarios, systemVersion);
-      toast.success("Benchmark started successfully");
+      // Create run entries for each selected scenario
+      for (const scenarioId of selectedScenarios) {
+        await addRun.mutateAsync({
+          scenario_id: scenarioId,
+          system_version: systemVersion,
+          state: 'paused',
+          user_id: session.user.id,
+          project_id: `temp_project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        });
+      }
+
+      toast.success("Benchmark runs created successfully");
+      startRunner();
     } catch (error) {
       console.error("Error starting benchmark:", error);
       toast.error("An error occurred while starting the benchmark. Please try again.");
