@@ -35,6 +35,7 @@ const StartBenchmark = () => {
           system_version: systemVersion,
           state: 'paused',
           user_id: session.user.id,
+          project_id: `temp_project_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         });
       }
 
