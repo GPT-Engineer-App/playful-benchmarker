@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSupabaseAuth } from "../integrations/supabase/auth";
-import { useBenchmarkScenarios } from "../integrations/supabase";
+import { useBenchmarkScenarios, useAddRun } from "../integrations/supabase";
+import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 import ScenarioSelection from "../components/ScenarioSelection";
 import SystemVersionSelection from "../components/SystemVersionSelection";
@@ -14,6 +15,7 @@ const StartBenchmark = () => {
   const [systemVersion, setSystemVersion] = useState("http://localhost:8000");
 
   const { isRunning, startRunner, stopRunner } = useBenchmarkRunner(systemVersion);
+  const addRun = useAddRun();
 
   if (scenariosLoading) {
     return <div>Loading...</div>;
@@ -28,16 +30,15 @@ const StartBenchmark = () => {
     try {
       // Create run entries for each selected scenario
       for (const scenarioId of selectedScenarios) {
-        await supabase
-          .from('runs')
-          .insert({
-            scenario_id: scenarioId,
-            system_version: systemVersion,
-            state: 'paused',
-            user_id: session.user.id,
-          });
+        await addRun.mutateAsync({
+          scenario_id: scenarioId,
+          system_version: systemVersion,
+          state: 'paused',
+          user_id: session.user.id,
+        });
       }
 
+      toast.success("Benchmark runs created successfully");
       startRunner();
     } catch (error) {
       console.error("Error starting benchmark:", error);
