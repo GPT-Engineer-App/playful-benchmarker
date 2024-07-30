@@ -16,14 +16,18 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session,
       return;
     }
 
-    if (!userSecrets || userSecrets.length === 0 || !JSON.parse(userSecrets[0].secret).GPT_ENGINEER_TEST_TOKEN) {
-      toast.error("GPT Engineer test token not found. Please set it up in your secrets.");
-      navigate("/secrets");
+    if (!userSecrets || userSecrets.length === 0) {
+      toast.error("No user secrets found. Please set up your GPT Engineer test token.");
       return;
     }
 
     const secrets = JSON.parse(userSecrets[0].secret);
     const gptEngineerTestToken = secrets.GPT_ENGINEER_TEST_TOKEN;
+
+    if (!gptEngineerTestToken) {
+      toast.error("GPT Engineer test token not found. Please set it up in your secrets.");
+      return;
+    }
 
     setIsRunning(true);
 
