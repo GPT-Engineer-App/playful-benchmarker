@@ -127,56 +127,45 @@ const useBenchmarkRunner = (systemVersion) => {
     }
   }, [updateRun, addResult, systemVersion]);
 
-  const startRunner = useCallback(() => {
-    setIsRunning(true);
-  }, []);
-
-  const stopRunner = useCallback(() => {
-    setIsRunning(false);
-  }, []);
-
   useEffect(() => {
-    let intervalId;
-    if (isRunning) {
-      intervalId = setInterval(async () => {
-        const { data: userSecrets, error } = await supabase
-          .from('user_secrets')
-          .select('secret')
-          .limit(1);
+    const subscription = supabase
+      .channel('runs_channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'runs' }, async (payload) => {
+        if (payload.new.state === 'running') {
+          const { data: userSecrets, error } = await supabase
+            .from('user_secrets')
+            .select('secret')
+            .limit(1);
 
-        if (error) {
-          console.error("Error fetching user secrets:", error);
-          setIsRunning(false);
-          toast.error("Failed to fetch user secrets. Stopping runner.");
-          return;
-        }
-
-        if (userSecrets && userSecrets.length > 0) {
-          const secrets = JSON.parse(userSecrets[0].secret);
-          const gptEngineerTestToken = secrets.GPT_ENGINEER_TEST_TOKEN;
-          if (gptEngineerTestToken) {
-            await handleSingleIteration(gptEngineerTestToken);
-          } else {
-            console.error("GPT Engineer test token not found in user secrets");
-            setIsRunning(false);
-            toast.error("GPT Engineer test token not found. Please set it up in your secrets.");
+          if (error) {
+            console.error("Error fetching user secrets:", error);
+            toast.error("Failed to fetch user secrets. Cannot run benchmark.");
+            return;
           }
-        } else {
-          console.error("No user secrets found");
-          setIsRunning(false);
-          toast.error("No user secrets found. Please set up your secrets.");
+
+          if (userSecrets && userSecrets.length > 0) {
+            const secrets = JSON.parse(userSecrets[0].secret);
+            const gptEngineerTestToken = secrets.GPT_ENGINEER_TEST_TOKEN;
+            if (gptEngineerTestToken) {
+              await handleSingleIteration(gptEngineerTestToken);
+            } else {
+              console.error("GPT Engineer test token not found in user secrets");
+              toast.error("GPT Engineer test token not found. Please set it up in your secrets.");
+            }
+          } else {
+            console.error("No user secrets found");
+            toast.error("No user secrets found. Please set up your secrets.");
+          }
         }
-      }, 5000); // Run every 5 seconds
-    }
+      })
+      .subscribe();
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      subscription.unsubscribe();
     };
-  }, [isRunning, handleSingleIteration]);
+  }, [handleSingleIteration]);
 
-  return { isRunning, startRunner, stopRunner };
+  return { isRunning };
 };
 
 export default useBenchmarkRunner;
