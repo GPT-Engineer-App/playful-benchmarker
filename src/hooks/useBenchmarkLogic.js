@@ -42,7 +42,7 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session)
         const scenario = scenarios.find((s) => s.id === scenarioId);
         
         // Call initial user impersonation function
-        const { projectId, initialRequest, messages: initialMessages } = await impersonateUser(scenario.prompt, systemVersion, scenario.llm_temperature);
+        const { projectId, initialRequest, messages: initialMessages, link } = await impersonateUser(scenario.prompt, systemVersion, scenario.llm_temperature);
 
         // Create a new run entry with 'running' state
         const { data: newRun, error: createRunError } = await supabase
@@ -52,7 +52,7 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session)
             system_version: systemVersion,
             project_id: projectId,
             user_id: session.user.id,
-            link: `${systemVersion}/projects/${projectId}`,
+            link: link,
             state: 'paused'
           })
           .select()
