@@ -53,7 +53,7 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session)
             project_id: projectId,
             user_id: session.user.id,
             link: `${systemVersion}/projects/${projectId}`,
-            state: 'paused'  // Create the run in paused state
+            state: 'paused'
           })
           .select()
           .single();
