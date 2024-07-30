@@ -15,13 +15,13 @@ const About = () => {
           <h3 className="text-2xl font-semibold mt-6 mb-2">How It Works</h3>
           <ul className="list-disc pl-6 space-y-2">
             <li>
-              We utilize a set of benchmark scenarios where an LLM (Language Model) simulates a user interacting with the product to build specific web applications.
+              We use benchmark scenarios where an LLM simulates a user interacting with the product to build web applications.
             </li>
             <li>
-              Each scenario is guided by a carefully crafted prompt that outlines the simulated user's goals and requirements.
+              Each scenario follows a prompt outlining the simulated user's goals and requirements.
             </li>
             <li>
-              After the scenario is completed, another set of LLMs reviews the results to assess performance across various dimensions.
+              After completion, another set of LLMs reviews the results to assess performance across various dimensions.
             </li>
           </ul>
           <h3 className="text-2xl font-semibold mt-6 mb-2">Key Performance Dimensions</h3>

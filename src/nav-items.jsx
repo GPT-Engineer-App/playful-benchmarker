@@ -9,9 +9,6 @@ import CreateReviewDimension from "./pages/CreateReviewDimension.jsx";
 import EditScenario from "./pages/EditScenario.jsx";
 import StartBenchmark from "./pages/StartBenchmark.jsx";
 
-/**
- * Central place for defining the navigation items. Used for navigation components and routing.
- */
 export const navItems = [
   {
     title: "Home",
