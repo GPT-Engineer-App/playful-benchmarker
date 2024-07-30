@@ -77,7 +77,7 @@ When the scenario is complete:
 
     const userMessage = {
       role: "user",
-      content: "Now, based on the following prompt, generate appropriate requests to the GPT Engineer system:\n\n" + prompt
+      content: prompt
     };
 
     const messages = [systemMessage, userMessage];
