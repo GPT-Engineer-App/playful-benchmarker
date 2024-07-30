@@ -6,7 +6,6 @@ import { SupabaseAuthProvider, useSupabaseAuth } from "./integrations/supabase/a
 import useBenchmarkRunner from "./hooks/useBenchmarkRunner";
 
 const BenchmarkRunner = () => {
-  const { session } = useSupabaseAuth();
   useBenchmarkRunner();
   return null;
 };

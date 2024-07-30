@@ -6,8 +6,7 @@ import { db } from '../lib/firebase';
 import { callOpenAILLM } from '../lib/anthropic';
 import { sendChatMessage, impersonateUser } from '../lib/userImpersonation';
 
-const useBenchmarkRunner = (systemVersion) => {
-  console.log('useBenchmarkRunner initialized with systemVersion:', systemVersion);
+const useBenchmarkRunner = () => {
   const [isRunning, setIsRunning] = useState(false);
   const updateRun = useUpdateRun();
   const addResult = useAddResult();
@@ -94,7 +93,7 @@ const useBenchmarkRunner = (systemVersion) => {
 
       // Call the chat endpoint
       console.log('Sending chat message');
-      const chatResponse = await sendChatMessage(availableRun.project_id, chatRequest, systemVersion, gptEngineerTestToken);
+      const chatResponse = await sendChatMessage(availableRun.project_id, chatRequest, availableRun.system_version, gptEngineerTestToken);
       console.log('Chat response:', chatResponse);
 
       // Add result
