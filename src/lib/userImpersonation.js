@@ -37,8 +37,7 @@ const createProject = async (description, systemVersion) => {
   if (!response.ok) {
     throw new Error('Failed to create project');
   }
-  const data = await response.json();
-  return { id: data.id, link: `${systemVersion}/projects/${data.id}` };
+  return response.json();
 };
 
 // Function to send a chat message to a project
@@ -92,7 +91,7 @@ When the scenario is complete:
       content: chatRequest
     });
 
-    return { projectId: project.id, initialRequest: chatRequest, messages, link: project.link };
+    return { projectId: project.id, initialRequest: chatRequest, messages };
   } catch (error) {
     console.error('Error in initial user impersonation:', error);
     throw error;
