@@ -6,7 +6,6 @@ import ScenarioSelection from "../components/ScenarioSelection";
 import SystemVersionSelection from "../components/SystemVersionSelection";
 import StartBenchmarkButton from "../components/StartBenchmarkButton";
 import useBenchmarkLogic from "../hooks/useBenchmarkLogic";
-import useBenchmarkRunner from "../hooks/useBenchmarkRunner";
 
 const StartBenchmark = () => {
   const { session } = useSupabaseAuth();
@@ -14,10 +13,7 @@ const StartBenchmark = () => {
   const [selectedScenarios, setSelectedScenarios] = useState([]);
   const [systemVersion, setSystemVersion] = useState("http://localhost:8000");
 
-  const { isRunning: isLogicRunning, handleStartBenchmark } = useBenchmarkLogic(selectedScenarios, scenarios, systemVersion, session);
-  const { isRunning: isRunnerRunning } = useBenchmarkRunner(systemVersion);
-
-  const isRunning = isLogicRunning || isRunnerRunning;
+  const { isRunning, handleStartBenchmark } = useBenchmarkLogic(selectedScenarios, scenarios, systemVersion, session);
 
   if (scenariosLoading) {
     return <div>Loading scenarios...</div>;
