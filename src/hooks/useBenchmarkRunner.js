@@ -146,7 +146,7 @@ const useBenchmarkRunner = () => {
         console.log('Run has timed out');
       }
     }
-  }, [updateRun, addResult, systemVersion]);
+  }, [updateRun, addResult]);
 
   useEffect(() => {
     const subscription = supabase
