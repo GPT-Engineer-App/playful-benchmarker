@@ -4,15 +4,16 @@ import { toast } from 'sonner';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { callOpenAILLM } from '../lib/anthropic';
-import { sendChatMessage } from '../lib/userImpersonation';
+import { sendChatMessage, impersonateUser } from '../lib/userImpersonation';
 
-const useBenchmarkRunner = () => {
+const useBenchmarkRunner = (systemVersion) => {
   const [isRunning, setIsRunning] = useState(false);
   const updateRun = useUpdateRun();
   const addResult = useAddResult();
 
   const handleSingleIteration = useCallback(async (gptEngineerTestToken) => {
     console.log('Starting single iteration');
+    console.log('System Version:', systemVersion);
     const { data: runs, error: runsError } = await supabase
       .from('runs')
       .select('*')
@@ -146,7 +147,7 @@ const useBenchmarkRunner = () => {
         console.log('Run has timed out');
       }
     }
-  }, [updateRun, addResult]);
+  }, [updateRun, addResult, systemVersion]);
 
   useEffect(() => {
     const subscription = supabase
