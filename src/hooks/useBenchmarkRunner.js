@@ -190,3 +190,5 @@ const useBenchmarkRunner = () => {
 };
 
 export default useBenchmarkRunner;
+
+export default useBenchmarkRunner;
