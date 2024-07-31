@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { callOpenAILLM } from '../lib/anthropic';
-import { sendChatMessage, impersonateUser } from '../lib/userImpersonation';
+import { sendChatMessage } from '../lib/userImpersonation';
 
 const useBenchmarkRunner = () => {
   const [isRunning, setIsRunning] = useState(false);
@@ -146,7 +146,7 @@ const useBenchmarkRunner = () => {
         console.log('Run has timed out');
       }
     }
-  }, [updateRun, addResult, systemVersion]);
+  }, [updateRun, addResult]);
 
   useEffect(() => {
     const subscription = supabase
