@@ -6,13 +6,14 @@ import { db } from '../lib/firebase';
 import { callOpenAILLM } from '../lib/anthropic';
 import { sendChatMessage, impersonateUser } from '../lib/userImpersonation';
 
-const useBenchmarkRunner = () => {
+const useBenchmarkRunner = (systemVersion) => {
   const [isRunning, setIsRunning] = useState(false);
   const updateRun = useUpdateRun();
   const addResult = useAddResult();
 
   const handleSingleIteration = useCallback(async (gptEngineerTestToken) => {
     console.log('Starting single iteration');
+    console.log('System Version:', systemVersion);
     const { data: runs, error: runsError } = await supabase
       .from('runs')
       .select('*')
