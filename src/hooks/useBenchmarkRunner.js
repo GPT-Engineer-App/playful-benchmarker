@@ -59,12 +59,12 @@ const useBenchmarkRunner = () => {
       const q = query(messagesRef, orderBy("timestamp", "asc"));
       const querySnapshot = await getDocs(q);
       let messages = querySnapshot.docs.map(doc => ({
-        role: doc.data().sender === "human" ? "user" : "assistant",
+        role: doc.data().sender === "human" ? "assistant" : "user",
         content: doc.data().content
       }));
       if (messages.length === 0) {
         messages = [{
-          role: "user",
+          role: "assistant",
           content: "No messages have been added yet. Let's start the conversation!"
         }];
       }
