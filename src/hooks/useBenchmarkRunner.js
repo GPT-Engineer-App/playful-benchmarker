@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { callSupabaseLLM } from '../lib/anthropic';
-import { sendChatMessage, impersonateUser } from '../lib/userImpersonation';
+import { sendChatMessage } from '../lib/userImpersonation';
 
 const useBenchmarkRunner = () => {
   const [isRunning, setIsRunning] = useState(false);
@@ -16,7 +16,7 @@ const useBenchmarkRunner = () => {
     const { data: runs, error: runsError } = await supabase
       .from('runs')
       .select('*')
-      .or('state.eq.paused,state.eq.running')
+      .eq('state', 'paused')
       .order('created_at', { ascending: true })
       .limit(1);
 
@@ -26,32 +26,28 @@ const useBenchmarkRunner = () => {
     }
 
     if (!runs || runs.length === 0) {
-      console.log("No runs available");
+      console.log("No paused runs available");
       return;
     }
 
     const availableRun = runs[0];
     console.log('Available run:', availableRun);
 
-    // If the run is paused, try to start it
-    if (availableRun.state === "paused") {
-      console.log('Attempting to start paused run:', availableRun.id);
-      const { data: runStarted, error: startError } = await supabase
-        .rpc('start_paused_run', { run_id: availableRun.id });
+    // Try to start the paused run
+    console.log('Attempting to start paused run:', availableRun.id);
+    const { data: runStarted, error: startError } = await supabase
+      .rpc('start_paused_run', { run_id: availableRun.id });
 
-      if (startError) {
-        console.error("Error starting run:", startError);
-        return;
-      }
-
-      if (!runStarted) {
-        console.log("Failed to start run (it may no longer be in 'paused' state):", availableRun.id);
-        return;
-      }
-      console.log('Run started successfully');
+    if (startError) {
+      console.error("Error starting run:", startError);
+      return;
     }
 
-    // At this point, the run should be in 'running' state
+    if (!runStarted) {
+      console.log("Failed to start run (it may no longer be in 'paused' state):", availableRun.id);
+      return;
+    }
+    console.log('Run started successfully');
 
     const startTime = Date.now();
     console.log('Starting iteration at:', new Date(startTime).toISOString());
@@ -149,41 +145,36 @@ const useBenchmarkRunner = () => {
   }, [updateRun, addResult]);
 
   useEffect(() => {
-    const subscription = supabase
-      .channel('runs_channel')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'runs' }, async (payload) => {
-        if (payload.new.state === 'running') {
-          const { data: userSecrets, error } = await supabase
-            .from('user_secrets')
-            .select('secret')
-            .limit(1);
+    const fetchUserSecrets = async () => {
+      const { data: userSecrets, error } = await supabase
+        .from('user_secrets')
+        .select('secret')
+        .limit(1);
 
-          if (error) {
-            console.error("Error fetching user secrets:", error);
-            toast.error("Failed to fetch user secrets. Cannot run benchmark.");
-            return;
-          }
+      if (error) {
+        console.error("Error fetching user secrets:", error);
+        toast.error("Failed to fetch user secrets. Cannot run benchmark.");
+        return null;
+      }
 
-          if (userSecrets && userSecrets.length > 0) {
-            const secrets = JSON.parse(userSecrets[0].secret);
-            const gptEngineerTestToken = secrets.GPT_ENGINEER_TEST_TOKEN;
-            if (gptEngineerTestToken) {
-              await handleSingleIteration(gptEngineerTestToken);
-            } else {
-              console.error("GPT Engineer test token not found in user secrets");
-              toast.error("GPT Engineer test token not found. Please set it up in your secrets.");
-            }
-          } else {
-            console.error("No user secrets found");
-            toast.error("No user secrets found. Please set up your secrets.");
-          }
-        }
-      })
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
+      if (userSecrets && userSecrets.length > 0) {
+        const secrets = JSON.parse(userSecrets[0].secret);
+        return secrets.GPT_ENGINEER_TEST_TOKEN;
+      } else {
+        console.error("No user secrets found");
+        toast.error("No user secrets found. Please set up your secrets.");
+        return null;
+      }
     };
+
+    const intervalId = setInterval(async () => {
+      const gptEngineerTestToken = await fetchUserSecrets();
+      if (gptEngineerTestToken) {
+        await handleSingleIteration(gptEngineerTestToken);
+      }
+    }, 5000);
+
+    return () => clearInterval(intervalId);
   }, [handleSingleIteration]);
 
   return { isRunning };
