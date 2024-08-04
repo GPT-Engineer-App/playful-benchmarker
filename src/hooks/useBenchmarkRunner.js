@@ -97,6 +97,11 @@ const useBenchmarkRunner = () => {
 
       const chatRequestMatch = nextAction.match(/<lov-chat-request>([\s\S]*?)<\/lov-chat-request>/);
       if (!chatRequestMatch) {
+        console.error("Unexpected assistant message format");
+        await updateRun.mutateAsync({
+          id: availableRun.id,
+          state: 'impersonator_failed',
+        });
         throw new Error("Unexpected assistant message format");
       }
 
