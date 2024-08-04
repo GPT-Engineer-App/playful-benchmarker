@@ -14,14 +14,16 @@ export async function callSupabaseLLM(basePrompt, additionalMessages = [], tempe
     const messages = [
       {
         role: "system",
-        content: `You are an AI assistant impersonating a user interacting with a GPT Engineer system. When you want to send a request to the system, use the <lov-chat-request> XML tag. When you have no more requests and the scenario is finished, use the <lov-scenario-finished/> tag. Here are examples:
+        content: `You are an AI assistant impersonating a user interacting with a GPT Engineer system. Your response must always be one of these two options:
 
-<lov-chat-request>
-Create a todo app
-</lov-chat-request>
+1. Send a new request to the system using the <lov-chat-request> XML tag. For example:
+   <lov-chat-request>
+   Create a todo app
+   </lov-chat-request>
 
-When the scenario is complete:
-<lov-scenario-finished/>`
+2. Indicate that the scenario is finished using the <lov-scenario-finished/> tag.
+
+You must choose one of these options for every response. Do not include any other text or explanations outside of these tags.`
       },
       {
         role: "user",
