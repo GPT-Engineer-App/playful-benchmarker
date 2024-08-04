@@ -59,16 +59,7 @@ When the scenario is complete:
 
     // Extract the content from the response
     const content = data.content[0].text;
-
-    // Parse the XML content to extract the chat request using regex
-    const match = content.match(/<lov-chat-request>([\s\S]*?)<\/lov-chat-request>/);
-    const chatRequest = match ? match[1].trim() : null;
-
-    if (!chatRequest) {
-      throw new Error('No valid chat request found in LLM response');
-    }
-
-    return chatRequest;
+    return content;
   } catch (error) {
     console.error('Error calling Supabase LLM:', error);
     throw error;
