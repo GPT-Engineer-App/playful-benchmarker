@@ -7,9 +7,10 @@ export async function callSupabaseLLM(basePrompt, additionalMessages = [], tempe
       throw new Error('User not authenticated');
     }
 
-    const systemMessage = {
-      role: "system",
-      content: `You are an AI assistant impersonating a user interacting with a GPT Engineer system. When you want to send a request to the system, use the <lov-chat-request> XML tag. When you have no more requests and the scenario is finished, use the <lov-scenario-finished/> tag. Here are examples:
+    const messages = [
+      {
+        role: "system",
+        content: `You are an AI assistant impersonating a user interacting with a GPT Engineer system. When you want to send a request to the system, use the <lov-chat-request> XML tag. When you have no more requests and the scenario is finished, use the <lov-scenario-finished/> tag. Here are examples:
 
 <lov-chat-request>
 Create a todo app
@@ -17,17 +18,22 @@ Create a todo app
 
 When the scenario is complete:
 <lov-scenario-finished/>`
-    };
-
-    const userMessage = {
-      role: "user",
-      content: basePrompt
-    };
-
-    const messages = [systemMessage, userMessage, ...additionalMessages];
+      },
+      {
+        role: "user",
+        content: basePrompt
+      },
+      ...additionalMessages
+    ];
 
     // Log the LLM request
     console.log('LLM Request:', JSON.stringify({ messages, temperature }, null, 2));
+
+    // Validate messages
+    const validMessages = messages.every(msg => msg.role && msg.content);
+    if (!validMessages) {
+      throw new Error('Invalid message format: All messages must have role and content fields');
+    }
 
     const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/llm', {
       method: 'POST',
