@@ -1,11 +1,30 @@
 import { supabase } from '../integrations/supabase';
 
-export async function callSupabaseLLM(messages, temperature = 0.7) {
+export async function callSupabaseLLM(basePrompt, additionalMessages = [], temperature = 0.7) {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       throw new Error('User not authenticated');
     }
+
+    const systemMessage = {
+      role: "system",
+      content: `You are an AI assistant impersonating a user interacting with a GPT Engineer system. When you want to send a request to the system, use the <lov-chat-request> XML tag. When you have no more requests and the scenario is finished, use the <lov-scenario-finished/> tag. Here are examples:
+
+<lov-chat-request>
+Create a todo app
+</lov-chat-request>
+
+When the scenario is complete:
+<lov-scenario-finished/>`
+    };
+
+    const userMessage = {
+      role: "user",
+      content: basePrompt
+    };
+
+    const messages = [systemMessage, userMessage, ...additionalMessages];
 
     // Log the LLM request
     console.log('LLM Request:', JSON.stringify({ messages, temperature }, null, 2));

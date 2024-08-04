@@ -72,7 +72,7 @@ const useBenchmarkRunner = () => {
 
       // Call OpenAI to get next user impersonation action
       console.log('Calling OpenAI for next action');
-      const nextAction = await callSupabaseLLM(messages, availableRun.llm_temperature);
+      const nextAction = await callSupabaseLLM(availableRun.prompt, messages, availableRun.llm_temperature);
       console.log('Next action:', nextAction);
 
       if (nextAction.includes("<lov-scenario-finished/>")) {
