@@ -233,14 +233,14 @@ export const useAddBenchmarkScenario = () => {
             const { data, error } = await supabase.from('benchmark_scenarios').insert([{
                 ...scenarioWithoutId,
                 timeout: scenarioWithoutId.timeout || 300 // Default to 5 minutes if not provided
-            }]).select();
+            }]).select().single();
             
             if (error) {
                 console.error("Error adding scenario:", error);
                 throw error;
             }
             
-            if (!data || data.length === 0) {
+            if (!data) {
                 console.error("No data returned after adding scenario");
                 throw new Error("No data returned after adding scenario");
             }

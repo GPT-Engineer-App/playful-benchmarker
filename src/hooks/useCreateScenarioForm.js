@@ -115,11 +115,11 @@ const useCreateScenarioForm = () => {
       if (scenarioError) {
         throw new Error("Failed to create scenario: " + scenarioError.message);
       }
-      if (!scenarioData || scenarioData.length === 0) {
+      if (!scenarioData) {
         throw new Error("Failed to create scenario: No data returned");
       }
 
-      const createdScenarioId = scenarioData[0].id;
+      const createdScenarioId = scenarioData.id;
       console.log("Created scenario ID:", createdScenarioId);
 
       const reviewerPromises = reviewers.map(reviewer =>
