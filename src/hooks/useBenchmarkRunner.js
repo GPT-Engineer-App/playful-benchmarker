@@ -56,16 +56,14 @@ const useBenchmarkRunner = () => {
       // Fetch project messages from Firestore
       console.log('Fetching project messages from Firestore');
       const messagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
-      const q = query(
-        messagesRef,
-        where('channel.type', '==', 'instant-channel'),
-        orderBy("timestamp", "asc")
-      );
+      const q = query(messagesRef, orderBy("created_at", "asc"));
       const querySnapshot = await getDocs(q);
-      let messages = querySnapshot.docs.map(doc => ({
-        role: doc.data().role === "user" ? "assistant" : "user",
-        content: doc.data().content
-      }));
+      let messages = querySnapshot.docs
+        .filter(doc => doc.data().channel?.type === 'instant-channel')
+        .map(doc => ({
+          role: doc.data().role === "user" ? "assistant" : "user",
+          content: doc.data().content
+        }));
       if (messages.length === 0) {
         messages = [{
           role: "user",
