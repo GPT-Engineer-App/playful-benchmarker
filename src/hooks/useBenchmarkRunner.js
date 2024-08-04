@@ -32,6 +32,7 @@ const useBenchmarkRunner = () => {
 
     const availableRun = runs[0];
     console.log('Available run:', availableRun);
+    console.log('Available run prompt:', availableRun.prompt);
 
     // Try to start the paused run
     console.log('Attempting to start paused run:', availableRun.id);
