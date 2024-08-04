@@ -72,18 +72,12 @@ const useBenchmarkRunner = () => {
       const messagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
       const q = query(messagesRef, orderBy("created_at", "asc"));
       const querySnapshot = await getDocs(q);
-      let messages = querySnapshot.docs
+      const messages = querySnapshot.docs
         .filter(doc => doc.data().channel?.type === 'instant-channel')
         .map(doc => ({
           role: doc.data().role === "user" ? "assistant" : "user",
           content: doc.data().content
         }));
-      if (messages.length === 0) {
-        messages = [{
-          role: "user",
-          content: "No messages have been added yet. Let's start the conversation!"
-        }];
-      }
       console.log('Fetched messages:', messages);
 
       // Call OpenAI to get next user impersonation action
