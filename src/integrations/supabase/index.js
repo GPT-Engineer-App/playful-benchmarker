@@ -246,7 +246,7 @@ export const useAddBenchmarkScenario = () => {
             }
             
             console.log("Successfully added scenario:", data);
-            return data;
+            return { data, error: null };
         },
         onSuccess: () => {
             queryClient.invalidateQueries('benchmark_scenarios');
