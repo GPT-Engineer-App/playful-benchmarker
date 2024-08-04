@@ -20,10 +20,13 @@ export async function callSupabaseLLM(messages, temperature = 0.7) {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`LLM call failed. Status: ${response.status}, Error: ${errorText}`);
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('LLM Response:', JSON.stringify(data, null, 2));
 
     // Log the LLM response
     console.log('LLM Response:', JSON.stringify(data, null, 2));
