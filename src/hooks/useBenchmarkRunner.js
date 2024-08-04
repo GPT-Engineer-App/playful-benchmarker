@@ -32,7 +32,20 @@ const useBenchmarkRunner = () => {
 
     const availableRun = runs[0];
     console.log('Available run:', availableRun);
-    console.log('Available run prompt:', availableRun.prompt);
+    
+    // Fetch the scenario associated with this run
+    const { data: scenario, error: scenarioError } = await supabase
+      .from('benchmark_scenarios')
+      .select('prompt')
+      .eq('id', availableRun.scenario_id)
+      .single();
+
+    if (scenarioError) {
+      console.error("Error fetching scenario:", scenarioError);
+      return;
+    }
+
+    console.log('Scenario prompt:', scenario.prompt);
 
     // Try to start the paused run
     console.log('Attempting to start paused run:', availableRun.id);
@@ -75,7 +88,7 @@ const useBenchmarkRunner = () => {
 
       // Call OpenAI to get next user impersonation action
       console.log('Calling OpenAI for next action');
-      const nextAction = await callSupabaseLLM(availableRun.prompt, messages, availableRun.llm_temperature);
+      const nextAction = await callSupabaseLLM(scenario.prompt, messages, availableRun.llm_temperature);
       console.log('Next action:', nextAction);
 
       if (nextAction.includes("<lov-scenario-finished/>")) {

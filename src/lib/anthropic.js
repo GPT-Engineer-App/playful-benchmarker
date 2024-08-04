@@ -7,6 +7,10 @@ export async function callSupabaseLLM(basePrompt, additionalMessages = [], tempe
       throw new Error('User not authenticated');
     }
 
+    if (!basePrompt) {
+      throw new Error('Base prompt is undefined or empty');
+    }
+
     const messages = [
       {
         role: "system",
