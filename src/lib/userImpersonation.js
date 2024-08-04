@@ -67,13 +67,7 @@ export const impersonateUser = async (prompt, systemVersion, temperature) => {
     const chatRequest = await callSupabaseLLM(prompt, [], temperature);
     const project = await createProject(chatRequest, systemVersion);
 
-    // Add the OpenAI response as an assistant message
-    messages.push({
-      role: "assistant",
-      content: chatRequest
-    });
-
-    return { projectId: project.id, projectLink: project.link, initialRequest: chatRequest, messages };
+    return { projectId: project.id, projectLink: project.link, initialRequest: chatRequest };
   } catch (error) {
     console.error('Error in initial user impersonation:', error);
     throw error;
