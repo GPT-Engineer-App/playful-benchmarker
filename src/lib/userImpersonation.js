@@ -22,7 +22,7 @@ const getUserSecrets = async () => {
 };
 
 // Function to create a new project
-const createProject = async (description, systemVersion) => {
+const createProject = async (prompt, systemVersion) => {
   const secrets = await getUserSecrets();
   const gptEngineerTestToken = secrets.GPT_ENGINEER_TEST_TOKEN;
 
@@ -32,7 +32,7 @@ const createProject = async (description, systemVersion) => {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${gptEngineerTestToken}`,
     },
-    body: JSON.stringify({ description, mode: 'instant' }),
+    body: JSON.stringify({ description: prompt, mode: 'instant' }),
   });
   if (!response.ok) {
     throw new Error('Failed to create project');
@@ -61,13 +61,12 @@ export const sendChatMessage = async (projectId, message, systemVersion) => {
 };
 
 // Function to handle initial user impersonation and project creation
-export const impersonateUser = async (prompt, systemVersion, temperature) => {
+export const impersonateUser = async (prompt, systemVersion) => {
   try {
     // Create a new project
-    const chatRequest = await callSupabaseLLM(prompt, [], temperature);
-    const project = await createProject(chatRequest, systemVersion);
+    const project = await createProject(prompt, systemVersion);
 
-    return { projectId: project.id, projectLink: project.link, initialRequest: chatRequest };
+    return { projectId: project.id, projectLink: project.link, initialRequest: prompt };
   } catch (error) {
     console.error('Error in initial user impersonation:', error);
     throw error;
