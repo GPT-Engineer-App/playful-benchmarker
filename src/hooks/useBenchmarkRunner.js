@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase, useUpdateRun, useAddResult } from '../integrations/supabase';
 import { toast } from 'sonner';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { callSupabaseLLM } from '../lib/anthropic';
 import { sendChatMessage } from '../lib/userImpersonation';
