@@ -28,11 +28,8 @@ export async function callSupabaseLLM(messages, temperature = 0.7) {
     const data = await response.json();
     console.log('LLM Response:', JSON.stringify(data, null, 2));
 
-    // Log the LLM response
-    console.log('LLM Response:', JSON.stringify(data, null, 2));
-
     // Extract the content from the response
-    const content = data.choices[0].message.content;
+    const content = data.content[0].text;
 
     // Parse the XML content to extract the chat request using regex
     const match = content.match(/<lov-chat-request>([\s\S]*?)<\/lov-chat-request>/);
