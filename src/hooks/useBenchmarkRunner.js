@@ -64,7 +64,7 @@ const useBenchmarkRunner = () => {
       }));
       if (messages.length === 0) {
         messages = [{
-          role: "assistant",
+          role: "user",
           content: "No messages have been added yet. Let's start the conversation!"
         }];
       }
