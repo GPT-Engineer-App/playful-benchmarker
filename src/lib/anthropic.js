@@ -1,30 +1,22 @@
 import { supabase } from '../integrations/supabase';
 
-export async function callOpenAILLM(messages, model = 'gpt-4o', temperature = 0.7) {
+export async function callSupabaseLLM(messages, temperature = 0.7) {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       throw new Error('User not authenticated');
     }
 
-    const systemVersion = 'http://localhost:8000';
-
-    const requestBody = {
-      model: model,
-      messages: messages,
-      max_tokens: 4096,
-      temperature: temperature
-    };
-
     // Log the LLM request
-    console.log('LLM Request:', JSON.stringify(requestBody, null, 2));
+    console.log('LLM Request:', JSON.stringify({ messages, temperature }, null, 2));
 
-    const response = await fetch(`${systemVersion}/openai/chat/completions`, {
+    const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/llm', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp5bHRza3dtaXdxdGhlYnJwenh0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjIxNTA2NjIsImV4cCI6MjAzNzcyNjY2Mn0.a1y6NavG5JxoGJCNrAckAKMvUDaXAmd2Ny0vMvz-7Ng'
       },
-      body: JSON.stringify(requestBody)
+      body: JSON.stringify({ messages, temperature })
     });
 
     if (!response.ok) {
@@ -49,7 +41,7 @@ export async function callOpenAILLM(messages, model = 'gpt-4o', temperature = 0.
 
     return chatRequest;
   } catch (error) {
-    console.error('Error calling OpenAI LLM:', error);
+    console.error('Error calling Supabase LLM:', error);
     throw error;
   }
 }

@@ -1,4 +1,4 @@
-import { callOpenAILLM } from './anthropic';
+import { callSupabaseLLM } from './anthropic';
 import { supabase } from '../integrations/supabase';
 
 // Function to retrieve user secrets
@@ -83,7 +83,7 @@ When the scenario is complete:
     const messages = [systemMessage, userMessage];
 
     // Create a new project
-    const chatRequest = await callOpenAILLM(messages, 'gpt-4o', temperature);
+    const chatRequest = await callSupabaseLLM(messages, temperature);
     const project = await createProject(chatRequest, systemVersion);
 
     // Add the OpenAI response as an assistant message

@@ -3,7 +3,7 @@ import { supabase, useUpdateRun, useAddResult } from '../integrations/supabase';
 import { toast } from 'sonner';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { callOpenAILLM } from '../lib/anthropic';
+import { callSupabaseLLM } from '../lib/anthropic';
 import { sendChatMessage, impersonateUser } from '../lib/userImpersonation';
 
 const useBenchmarkRunner = () => {
@@ -70,7 +70,7 @@ const useBenchmarkRunner = () => {
 
       // Call OpenAI to get next user impersonation action
       console.log('Calling OpenAI for next action');
-      const nextAction = await callOpenAILLM(messages, 'gpt-4o', availableRun.llm_temperature);
+      const nextAction = await callSupabaseLLM(messages, availableRun.llm_temperature);
       console.log('Next action:', nextAction);
 
       if (nextAction.includes("<lov-scenario-finished/>")) {
