@@ -173,12 +173,18 @@ const useBenchmarkRunner = () => {
       }
     };
 
-    const intervalId = setInterval(async () => {
+    const runIteration = async () => {
       const gptEngineerTestToken = await fetchUserSecrets();
       if (gptEngineerTestToken) {
         await handleSingleIteration(gptEngineerTestToken);
       }
-    }, 5000);
+    };
+
+    // Run the first iteration immediately
+    runIteration();
+
+    // Set up the interval for subsequent iterations
+    const intervalId = setInterval(runIteration, 60000);
 
     return () => clearInterval(intervalId);
   }, [handleSingleIteration]);
