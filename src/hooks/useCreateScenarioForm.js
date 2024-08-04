@@ -108,12 +108,19 @@ const useCreateScenarioForm = () => {
     }
 
     try {
+      console.log("Attempting to create scenario:", scenario);
       const { data: scenarioData, error: scenarioError } = await addBenchmarkScenario.mutateAsync(scenario);
-      if (scenarioError || !scenarioData) {
-        throw new Error("Failed to create scenario: " + (scenarioError?.message || "No data returned"));
+      console.log("Scenario creation response:", { data: scenarioData, error: scenarioError });
+      
+      if (scenarioError) {
+        throw new Error("Failed to create scenario: " + scenarioError.message);
+      }
+      if (!scenarioData || scenarioData.length === 0) {
+        throw new Error("Failed to create scenario: No data returned");
       }
 
       const createdScenarioId = scenarioData[0].id;
+      console.log("Created scenario ID:", createdScenarioId);
 
       const reviewerPromises = reviewers.map(reviewer =>
         addReviewer.mutateAsync({

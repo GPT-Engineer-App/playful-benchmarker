@@ -227,12 +227,31 @@ export const useBenchmarkScenario = (id) => useQuery({
 export const useAddBenchmarkScenario = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (newScenario) => fromSupabase(supabase.from('benchmark_scenarios').insert([{
-            ...newScenario,
-            timeout: newScenario.timeout || 300 // Default to 5 minutes if not provided
-        }]).select()),
+        mutationFn: async (newScenario) => {
+            console.log("Adding new scenario:", newScenario);
+            const { data, error } = await supabase.from('benchmark_scenarios').insert([{
+                ...newScenario,
+                timeout: newScenario.timeout || 300 // Default to 5 minutes if not provided
+            }]).select();
+            
+            if (error) {
+                console.error("Error adding scenario:", error);
+                throw error;
+            }
+            
+            if (!data || data.length === 0) {
+                console.error("No data returned after adding scenario");
+                throw new Error("No data returned after adding scenario");
+            }
+            
+            console.log("Successfully added scenario:", data);
+            return data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries('benchmark_scenarios');
+        },
+        onError: (error) => {
+            console.error("Mutation error:", error);
         },
     });
 };
