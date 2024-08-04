@@ -55,7 +55,7 @@ const useBenchmarkRunner = () => {
     try {
       // Fetch project messages from Firestore
       console.log('Fetching project messages from Firestore');
-      const messagesRef = collection(db, `project/${availableRun.project_id}/trajectory`);
+      const messagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
       const q = query(messagesRef, orderBy("timestamp", "asc"));
       const querySnapshot = await getDocs(q);
       const messages = querySnapshot.docs.map(doc => ({
