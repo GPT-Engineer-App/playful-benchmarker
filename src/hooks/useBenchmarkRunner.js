@@ -145,22 +145,23 @@ const useBenchmarkRunner = () => {
       if (error) console.error('Error updating time usage:', error);
 
       // Check if the run has timed out
-      console.log('Checking if run has timed out');
+      console.log('Checking run state');
       const { data: runData } = await supabase
         .from('runs')
         .select('state')
         .eq('id', availableRun.id)
         .single();
 
-      if (runData.state !== 'timed_out') {
-        console.log('Run not timed out, updating state to paused');
-        // Update run state back to 'paused' only if it hasn't timed out
+      if (runData.state === 'timed_out') {
+        console.log('Run has timed out');
+      } else if (runData.state === 'impersonator_failed') {
+        console.log('Impersonator failed, not updating state');
+      } else {
+        console.log('Updating state to paused');
         await updateRun.mutateAsync({
           id: availableRun.id,
           state: 'paused',
         });
-      } else {
-        console.log('Run has timed out');
       }
     }
   }, [updateRun, addResult]);
