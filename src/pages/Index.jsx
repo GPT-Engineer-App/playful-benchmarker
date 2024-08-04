@@ -14,7 +14,7 @@ const Index = () => {
   const { data: runs, isLoading: isLoadingRuns } = useRuns();
 
   const totalScenarios = scenarios?.length || 0;
-  const totalRuns = runs?.length || 0;
+  const totalRuns = runs?.count || 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">

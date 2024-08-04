@@ -305,7 +305,7 @@ export const useDeleteResult = () => {
 // Runs
 export const useRuns = () => useQuery({
     queryKey: ['runs'],
-    queryFn: () => fromSupabase(supabase.from('runs').select('*').order('created_at', { ascending: false }).limit(10)),
+    queryFn: () => fromSupabase(supabase.from('runs').select('*', { count: 'exact' })),
 });
 
 export const useRun = (id) => useQuery({
