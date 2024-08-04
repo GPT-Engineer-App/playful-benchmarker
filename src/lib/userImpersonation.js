@@ -66,7 +66,7 @@ export const impersonateUser = async (prompt, systemVersion) => {
     // Create a new project
     const project = await createProject(prompt, systemVersion);
 
-    return { projectId: project.id, projectLink: project.link, initialRequest: prompt };
+    return { projectId: project.id, projectLink: project.link };
   } catch (error) {
     console.error('Error in initial user impersonation:', error);
     throw error;
