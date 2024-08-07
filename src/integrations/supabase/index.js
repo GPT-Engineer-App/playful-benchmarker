@@ -215,7 +215,12 @@ export const useDeleteReviewDimension = () => {
 // Benchmark Scenarios
 export const useBenchmarkScenarios = () => useQuery({
     queryKey: ['benchmark_scenarios'],
-    queryFn: () => fromSupabase(supabase.from('benchmark_scenarios').select('*, reviewers(*)')),
+    queryFn: () => fromSupabase(supabase.from('benchmark_scenarios').select(`
+        *,
+        scenario_reviewers (
+            reviewer:reviewers (*)
+        )
+    `)),
 });
 
 export const useBenchmarkScenario = (id) => useQuery({

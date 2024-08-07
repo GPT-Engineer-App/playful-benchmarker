@@ -123,12 +123,15 @@ const useCreateScenarioForm = () => {
       
       console.log("Created scenario ID:", createdScenarioId);
 
-      const reviewerPromises = reviewers.map(reviewer =>
-        addReviewer.mutateAsync({
-          ...reviewer,
-          scenario_id: createdScenarioId,
-        })
-      );
+      const reviewerPromises = reviewers.map(async (reviewer) => {
+        const { data: newReviewer } = await addReviewer.mutateAsync(reviewer);
+        if (newReviewer && newReviewer.id) {
+          await supabase.from('scenario_reviewers').insert({
+            scenario_id: createdScenarioId,
+            reviewer_id: newReviewer.id,
+          });
+        }
+      });
 
       await Promise.all(reviewerPromises);
 
