@@ -21,6 +21,7 @@ const Navbar = () => {
               <>
                 <li><Link to="/secrets" className="hover:underline">Secrets</Link></li>
                 <li><Link to="/create-scenario" className="hover:underline">Create Scenario</Link></li>
+                <li><Link to="/create-reviewer" className="hover:underline">Create Reviewer</Link></li>
                 <li><Link to="/start-benchmark" className="hover:underline">Start Benchmark</Link></li>
                 <li><Button onClick={handleLogout} variant="ghost" className="h-9 px-4 py-2">Logout</Button></li>
               </>
