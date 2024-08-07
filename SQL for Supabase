@@ -1,3 +1,19 @@
+-- Remove the scenario_id column from the reviewers table
+ALTER TABLE reviewers DROP COLUMN scenario_id;
+
+-- Create a new table to link scenarios and reviewers
+CREATE TABLE scenario_reviewers (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  scenario_id UUID NOT NULL REFERENCES benchmark_scenarios(id) ON DELETE CASCADE,
+  reviewer_id UUID NOT NULL REFERENCES reviewers(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  UNIQUE(scenario_id, reviewer_id)
+);
+
+-- Add indexes to improve query performance
+CREATE INDEX idx_scenario_reviewers_scenario_id ON scenario_reviewers(scenario_id);
+CREATE INDEX idx_scenario_reviewers_reviewer_id ON scenario_reviewers(reviewer_id);
+
 -- Add a new column to the runs table
 ALTER TABLE runs
 ADD COLUMN total_time_usage INTEGER DEFAULT 0;
