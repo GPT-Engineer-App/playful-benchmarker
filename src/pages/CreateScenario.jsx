@@ -45,14 +45,6 @@ const CreateScenario = () => {
     }
   };
 
-  const handleGenericReviewerSelection = (reviewerId) => {
-    setSelectedGenericReviewers((prev) =>
-      prev.includes(reviewerId)
-        ? prev.filter((id) => id !== reviewerId)
-        : [...prev, reviewerId]
-    );
-  };
-
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
