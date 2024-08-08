@@ -134,6 +134,11 @@ export const useReviewers = () => useQuery({
     queryFn: () => fromSupabase(supabase.from('reviewers').select('*')),
 });
 
+export const useGenericReviewers = () => useQuery({
+    queryKey: ['genericReviewers'],
+    queryFn: () => fromSupabase(supabase.from('reviewers').select('*').eq('is_generic', true)),
+});
+
 export const useReviewer = (id) => useQuery({
     queryKey: ['reviewers', id],
     queryFn: () => fromSupabase(supabase.from('reviewers').select('*').eq('id', id).single()),
@@ -146,6 +151,17 @@ export const useAddReviewer = () => {
         mutationFn: (newReviewer) => fromSupabase(supabase.from('reviewers').insert([newReviewer])),
         onSuccess: () => {
             queryClient.invalidateQueries('reviewers');
+            queryClient.invalidateQueries('genericReviewers');
+        },
+    });
+};
+
+export const useAddScenarioReviewer = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (newScenarioReviewer) => fromSupabase(supabase.from('scenario_reviewers').insert([newScenarioReviewer])),
+        onSuccess: () => {
+            queryClient.invalidateQueries('scenarioReviewers');
         },
     });
 };

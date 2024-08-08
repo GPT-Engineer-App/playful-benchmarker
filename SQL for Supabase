@@ -14,6 +14,9 @@ CREATE TABLE scenario_reviewers (
 CREATE INDEX idx_scenario_reviewers_scenario_id ON scenario_reviewers(scenario_id);
 CREATE INDEX idx_scenario_reviewers_reviewer_id ON scenario_reviewers(reviewer_id);
 
+-- Add is_generic column to reviewers table
+ALTER TABLE reviewers ADD COLUMN is_generic BOOLEAN DEFAULT FALSE;
+
 -- Add a new column to the runs table
 ALTER TABLE runs
 ADD COLUMN total_time_usage INTEGER DEFAULT 0;
