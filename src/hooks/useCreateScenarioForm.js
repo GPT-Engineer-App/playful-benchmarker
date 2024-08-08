@@ -34,6 +34,16 @@ const useCreateScenarioForm = () => {
     return savedGenericReviewers ? JSON.parse(savedGenericReviewers) : [];
   });
 
+  const defaultReviewer = {
+    dimension: "",
+    description: "",
+    prompt: "",
+    weight: 1,
+    llm_model: "gpt-3.5-turbo",
+    llm_temperature: 0,
+    run_count: 1,
+  };
+
   const saveDraft = useCallback(() => {
     localStorage.setItem('draftScenario', JSON.stringify(scenario));
     localStorage.setItem('draftSpecificReviewers', JSON.stringify(specificReviewers));
@@ -90,17 +100,18 @@ const useCreateScenarioForm = () => {
     });
   };
 
+  const handleSpecificReviewerLLMModelChange = (index, value) => {
+    setSpecificReviewers((prev) => {
+      const newReviewers = [...prev];
+      newReviewers[index] = { ...newReviewers[index], llm_model: value };
+      return newReviewers;
+    });
+  };
+
   const addSpecificReviewerField = (existingReviewer = null) => {
     setSpecificReviewers((prev) => [
       ...prev,
-      existingReviewer || {
-        dimension: "",
-        description: "",
-        prompt: "",
-        weight: 1,
-        llm_temperature: 0,
-        run_count: 1,
-      },
+      existingReviewer || defaultReviewer,
     ]);
   };
 

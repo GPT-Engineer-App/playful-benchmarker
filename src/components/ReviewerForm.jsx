@@ -14,6 +14,7 @@ const ReviewerForm = ({
   handleReviewerChange, 
   handleReviewerDimensionChange, 
   handleReviewerLLMTemperatureChange,
+  handleReviewerLLMModelChange,
   handleSubmit,
   submitButtonText
 }) => (
@@ -87,6 +88,19 @@ const ReviewerForm = ({
           </div>
         ))}
       </RadioGroup>
+    </div>
+    <div>
+      <Label htmlFor="llm_model">LLM Model</Label>
+      <Select value={reviewer.llm_model} onValueChange={handleReviewerLLMModelChange}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select LLM Model" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="gpt-3.5-turbo">GPT-3.5 Turbo</SelectItem>
+          <SelectItem value="gpt-4">GPT-4</SelectItem>
+          <SelectItem value="claude-2">Claude 2</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
     <div>
       <Label htmlFor="llm_temperature">LLM Temperature: {reviewer.llm_temperature.toFixed(2)}</Label>
