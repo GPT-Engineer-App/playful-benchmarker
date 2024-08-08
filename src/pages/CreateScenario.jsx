@@ -11,7 +11,6 @@ import { useGenericReviewers } from "../integrations/supabase";
 
 const CreateScenario = () => {
   const navigate = useNavigate();
-  const { data: genericReviewers, isLoading: isLoadingGenericReviewers } = useGenericReviewers();
   const {
     scenario,
     specificReviewers,
