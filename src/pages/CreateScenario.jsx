@@ -15,6 +15,7 @@ const CreateScenario = () => {
     scenario,
     specificReviewers,
     selectedGenericReviewers,
+    setSelectedGenericReviewers,
     reviewDimensions,
     isLoadingDimensions,
     handleScenarioChange,
@@ -42,6 +43,14 @@ const CreateScenario = () => {
       addSpecificReviewerField();
       setActiveReviewerIndex(specificReviewers.length);
     }
+  };
+
+  const handleGenericReviewerSelection = (reviewerId) => {
+    setSelectedGenericReviewers((prev) =>
+      prev.includes(reviewerId)
+        ? prev.filter((id) => id !== reviewerId)
+        : [...prev, reviewerId]
+    );
   };
 
   return (
@@ -123,16 +132,20 @@ const CreateScenario = () => {
             {isLoadingGenericReviewers ? (
               <p>Loading generic reviewers...</p>
             ) : (
-              genericReviewers?.map((reviewer) => (
-                <div key={reviewer.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`generic-reviewer-${reviewer.id}`}
-                    checked={selectedGenericReviewers.includes(reviewer.id)}
-                    onCheckedChange={() => handleGenericReviewerSelection(reviewer.id)}
-                  />
-                  <label htmlFor={`generic-reviewer-${reviewer.id}`}>{reviewer.dimension}</label>
-                </div>
-              ))
+              <div className="grid grid-cols-2 gap-4">
+                {genericReviewers?.map((reviewer) => (
+                  <div key={reviewer.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`generic-reviewer-${reviewer.id}`}
+                      checked={selectedGenericReviewers.includes(reviewer.id)}
+                      onCheckedChange={() => handleGenericReviewerSelection(reviewer.id)}
+                    />
+                    <label htmlFor={`generic-reviewer-${reviewer.id}`} className="text-sm">
+                      {reviewer.dimension}
+                    </label>
+                  </div>
+                ))}
+              </div>
             )}
           </div>
 

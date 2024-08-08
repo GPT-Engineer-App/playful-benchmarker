@@ -179,6 +179,7 @@ const useCreateScenarioForm = () => {
     scenario,
     specificReviewers,
     selectedGenericReviewers,
+    setSelectedGenericReviewers,
     reviewDimensions,
     isLoadingDimensions,
     handleScenarioChange,
@@ -192,7 +193,6 @@ const useCreateScenarioForm = () => {
     handleSubmit,
     setScenario,
     setSpecificReviewers,
-    setSelectedGenericReviewers,
     existingReviewers,
     isLoadingReviewers,
   };
