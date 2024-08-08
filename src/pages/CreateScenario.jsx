@@ -11,6 +11,7 @@ import { useGenericReviewers } from "../integrations/supabase";
 
 const CreateScenario = () => {
   const navigate = useNavigate();
+  const { data: genericReviewers, isLoading: isLoadingGenericReviewers } = useGenericReviewers();
   const {
     scenario,
     specificReviewers,
@@ -115,6 +116,24 @@ const CreateScenario = () => {
                   Add Specific Reviewer
                 </Button>
               </div>
+            )}
+          </div>
+
+          <div className="space-y-4 mt-8">
+            <h2 className="text-2xl font-bold">Generic Reviewers</h2>
+            {isLoadingGenericReviewers ? (
+              <p>Loading generic reviewers...</p>
+            ) : (
+              genericReviewers?.map((reviewer) => (
+                <div key={reviewer.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`generic-reviewer-${reviewer.id}`}
+                    checked={selectedGenericReviewers.includes(reviewer.id)}
+                    onCheckedChange={() => handleGenericReviewerSelection(reviewer.id)}
+                  />
+                  <label htmlFor={`generic-reviewer-${reviewer.id}`}>{reviewer.dimension}</label>
+                </div>
+              ))
             )}
           </div>
 
