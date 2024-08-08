@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ScenarioDetails from "../components/ScenarioDetails";
 import ReviewerForm from "../components/ReviewerForm";
 import useCreateScenarioForm from "../hooks/useCreateScenarioForm";
@@ -21,9 +22,12 @@ const CreateScenario = () => {
     addReviewerField,
     handleDeleteReviewer,
     handleSubmit,
+    existingReviewers,
+    isLoadingReviewers,
   } = useCreateScenarioForm();
 
   const [activeReviewerIndex, setActiveReviewerIndex] = useState(null);
+  const [selectedExistingReviewer, setSelectedExistingReviewer] = useState(null);
 
   const handleReviewerSubmit = (e) => {
     e.preventDefault();
@@ -76,7 +80,36 @@ const CreateScenario = () => {
               </div>
             ))}
             {activeReviewerIndex === null && (
-              <Button type="button" onClick={() => setActiveReviewerIndex(reviewers.length)}>Add Reviewer</Button>
+              <div className="flex items-center space-x-2">
+                <Select
+                  onValueChange={(value) => setSelectedExistingReviewer(existingReviewers.find(r => r.id === value))}
+                  disabled={isLoadingReviewers}
+                >
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select existing reviewer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {existingReviewers?.map((reviewer) => (
+                      <SelectItem key={reviewer.id} value={reviewer.id}>
+                        {reviewer.dimension}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (selectedExistingReviewer) {
+                      addReviewerField(selectedExistingReviewer);
+                    } else {
+                      setActiveReviewerIndex(reviewers.length);
+                    }
+                    setSelectedExistingReviewer(null);
+                  }}
+                >
+                  Add Reviewer
+                </Button>
+              </div>
             )}
           </div>
 

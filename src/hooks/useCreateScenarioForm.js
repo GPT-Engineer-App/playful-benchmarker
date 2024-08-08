@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseAuth } from "../integrations/supabase/auth";
-import { useAddBenchmarkScenario, useAddReviewer, useReviewDimensions } from "../integrations/supabase";
+import { useAddBenchmarkScenario, useAddReviewer, useReviewDimensions, useReviewers } from "../integrations/supabase";
 import { toast } from "sonner";
 
 const useCreateScenarioForm = () => {
@@ -10,6 +10,7 @@ const useCreateScenarioForm = () => {
   const addBenchmarkScenario = useAddBenchmarkScenario();
   const addReviewer = useAddReviewer();
   const { data: reviewDimensions, isLoading: isLoadingDimensions } = useReviewDimensions();
+  const { data: existingReviewers, isLoading: isLoadingReviewers } = useReviewers();
 
   const [scenario, setScenario] = useState(() => {
     const savedScenario = localStorage.getItem('draftScenario');
@@ -82,10 +83,10 @@ const useCreateScenarioForm = () => {
     });
   };
 
-  const addReviewerField = () => {
+  const addReviewerField = (existingReviewer = null) => {
     setReviewers((prev) => [
       ...prev,
-      {
+      existingReviewer || {
         dimension: "",
         description: "",
         prompt: "",
@@ -162,6 +163,8 @@ const useCreateScenarioForm = () => {
     handleSubmit,
     setScenario,
     setReviewers,
+    existingReviewers,
+    isLoadingReviewers,
   };
 };
 
