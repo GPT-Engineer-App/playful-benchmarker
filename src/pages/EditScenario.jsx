@@ -96,16 +96,6 @@ const EditScenario = () => {
             ) : (
               <p>No reviewers found for this scenario.</p>
             )}
-                reviewer={reviewer}
-                index={index}
-                reviewDimensions={reviewDimensions}
-                isLoadingDimensions={isLoadingDimensions}
-                handleReviewerChange={handleReviewerChange}
-                handleReviewerDimensionChange={handleReviewerDimensionChange}
-                handleReviewerLLMTemperatureChange={handleReviewerLLMTemperatureChange}
-                handleDeleteReviewer={handleDeleteReviewer}
-              />
-            ))}
             <Button type="button" onClick={addReviewerField}>Add Reviewer</Button>
           </div>
 
