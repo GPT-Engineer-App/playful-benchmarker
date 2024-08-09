@@ -41,6 +41,11 @@ Choose one of these options for every response, based on how a real user would i
       throw new Error('Invalid message format: All messages must have role and content fields');
     }
 
+    // Assert that the last message has role "user"
+    if (messages[messages.length - 1].role !== "user") {
+      throw new Error('The last message must have a role of "user"');
+    }
+
     const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/llm', {
       method: 'POST',
       headers: {
