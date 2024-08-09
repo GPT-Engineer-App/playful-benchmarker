@@ -33,6 +33,40 @@ BEGIN
   WHERE id = run_id;
 END;
 $$ LANGUAGE plpgsql;
+
+-- Create a new table for trajectory messages
+CREATE TABLE trajectory_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  run_id UUID NOT NULL REFERENCES runs(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('impersonator', 'tool_output')),
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  CONSTRAINT fk_run
+    FOREIGN KEY(run_id)
+    REFERENCES runs(id)
+    ON DELETE CASCADE
+);
+
+-- Add an index to improve query performance
+CREATE INDEX idx_trajectory_messages_run_id ON trajectory_messages(run_id);
+
+-- Create a function to add a new trajectory message
+CREATE OR REPLACE FUNCTION add_trajectory_message(
+  p_run_id UUID,
+  p_content TEXT,
+  p_role TEXT
+)
+RETURNS UUID AS $$
+DECLARE
+  new_message_id UUID;
+BEGIN
+  INSERT INTO trajectory_messages (run_id, content, role)
+  VALUES (p_run_id, p_content, p_role)
+  RETURNING id INTO new_message_id;
+  
+  RETURN new_message_id;
+END;
+$$ LANGUAGE plpgsql;
 -- Create or replace a function to start a run transactionally
 CREATE OR REPLACE FUNCTION start_paused_run(run_id UUID)
 RETURNS BOOLEAN AS $$
