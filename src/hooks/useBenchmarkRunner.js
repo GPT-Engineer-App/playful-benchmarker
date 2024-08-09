@@ -3,6 +3,8 @@ import { supabase, useUpdateRun } from '../integrations/supabase';
 import { toast } from 'sonner';
 import { callSupabaseLLM } from '../lib/anthropic';
 import { sendChatMessage } from '../lib/userImpersonation';
+import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 const useBenchmarkRunner = () => {
   const [isRunning, setIsRunning] = useState(false);
