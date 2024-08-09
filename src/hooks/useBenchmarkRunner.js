@@ -1,8 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase, useUpdateRun } from '../integrations/supabase';
 import { toast } from 'sonner';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
-import { db } from '../lib/firebase';
 import { callSupabaseLLM } from '../lib/anthropic';
 import { sendChatMessage } from '../lib/userImpersonation';
 
@@ -66,17 +64,23 @@ const useBenchmarkRunner = () => {
     console.log('Starting iteration at:', new Date(startTime).toISOString());
 
     try {
-      // Fetch project messages from Firestore
-      console.log('Fetching project messages from Firestore');
-      const messagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
-      const q = query(messagesRef, orderBy("created_at", "asc"));
-      const querySnapshot = await getDocs(q);
-      const messages = querySnapshot.docs
-        .filter(doc => doc.data().channel?.type === 'instant-channel')
-        .map(doc => ({
-          role: doc.data().role === "user" ? "assistant" : "user",
-          content: doc.data().content
-        }));
+      // Fetch project messages from Supabase trajectory table
+      console.log('Fetching project messages from Supabase');
+      const { data: trajectoryMessages, error: trajectoryError } = await supabase
+        .from('trajectory_messages')
+        .select('*')
+        .eq('run_id', availableRun.id)
+        .order('created_at', { ascending: true });
+
+      if (trajectoryError) {
+        console.error("Error fetching trajectory messages:", trajectoryError);
+        throw trajectoryError;
+      }
+
+      const messages = trajectoryMessages.map(msg => ({
+        role: msg.role === "impersonator" ? "assistant" : "user",
+        content: msg.content
+      }));
       console.log('Fetched messages:', messages);
 
       // Call OpenAI to get next user impersonation action
