@@ -118,26 +118,26 @@ const useBenchmarkRunner = () => {
       console.log('Sending chat message');
       await sendChatMessage(availableRun.project_id, chatRequest, availableRun.system_version, gptEngineerTestToken);
       
-      // Fetch the latest messages from the project's trajectory
+      // Fetch all messages from the project's trajectory
       const latestMessagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
-      const latestMessagesQuery = query(latestMessagesRef, orderBy("created_at", "desc"), limit(1));
+      const latestMessagesQuery = query(latestMessagesRef, orderBy("created_at", "desc"));
       const latestMessagesSnapshot = await getDocs(latestMessagesQuery);
       
-      if (!latestMessagesSnapshot.empty) {
-        const latestMessage = latestMessagesSnapshot.docs[0].data();
-        if (latestMessage.role === 'assistant') {
-          // Insert trajectory message for tool output
-          await supabase.rpc('add_trajectory_message', {
-            p_run_id: availableRun.id,
-            p_content: latestMessage.content,
-            p_role: 'tool_output'
-          });
-          console.log('Latest assistant message:', latestMessage.content);
-        } else {
-          console.warn('Latest message is not from assistant:', latestMessage);
-        }
+      const filteredMessages = latestMessagesSnapshot.docs
+        .map(doc => ({ ...doc.data(), id: doc.id }))
+        .filter(msg => msg.role === 'assistant' && msg.channel?.type === 'instant-channel');
+
+      if (filteredMessages.length > 0) {
+        const latestMessage = filteredMessages[0];
+        // Insert trajectory message for tool output
+        await supabase.rpc('add_trajectory_message', {
+          p_run_id: availableRun.id,
+          p_content: latestMessage.content,
+          p_role: 'tool_output'
+        });
+        console.log('Latest assistant message:', latestMessage.content);
       } else {
-        console.warn('No messages found in the project trajectory');
+        console.warn('No matching messages found in the project trajectory');
       }
 
       console.log('Iteration completed successfully');
