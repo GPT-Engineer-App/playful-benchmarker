@@ -151,6 +151,10 @@ const useBenchmarkRunner = () => {
     } catch (error) {
       console.error("Error during iteration:", error);
       toast.error(`Iteration failed: ${error.message}`);
+      await updateRun.mutateAsync({
+        id: availableRun.id,
+        state: 'impersonator_failed',
+      });
     } finally {
       const endTime = Date.now();
       const timeUsage = Math.round((endTime - startTime) / 1000); // Convert to seconds
