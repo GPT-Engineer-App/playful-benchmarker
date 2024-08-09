@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase, useUpdateRun } from '../integrations/supabase';
 import { toast } from 'sonner';
+import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 import { callSupabaseLLM } from '../lib/anthropic';
 import { sendChatMessage } from '../lib/userImpersonation';
 
@@ -64,23 +66,17 @@ const useBenchmarkRunner = () => {
     console.log('Starting iteration at:', new Date(startTime).toISOString());
 
     try {
-      // Fetch project messages from Supabase trajectory table
-      console.log('Fetching project messages from Supabase trajectory table');
-      const { data: trajectoryMessages, error: trajectoryError } = await supabase
-        .from('trajectory_messages')
-        .select('*')
-        .eq('run_id', availableRun.id)
-        .order('created_at', { ascending: true });
-
-      if (trajectoryError) {
-        console.error("Error fetching trajectory messages:", trajectoryError);
-        throw trajectoryError;
-      }
-
-      const messages = trajectoryMessages.map(msg => ({
-        role: msg.role === "impersonator" ? "assistant" : "user",
-        content: msg.content
-      }));
+      // Fetch project messages from Firestore
+      console.log('Fetching project messages from Firestore');
+      const messagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
+      const q = query(messagesRef, orderBy("created_at", "asc"));
+      const querySnapshot = await getDocs(q);
+      const messages = querySnapshot.docs
+        .filter(doc => doc.data().channel?.type === 'instant-channel')
+        .map(doc => ({
+          role: doc.data().role === "user" ? "assistant" : "user",
+          content: doc.data().content
+        }));
       console.log('Fetched messages:', messages);
 
       // Call OpenAI to get next user impersonation action
@@ -122,25 +118,26 @@ const useBenchmarkRunner = () => {
       console.log('Sending chat message');
       await sendChatMessage(availableRun.project_id, chatRequest, availableRun.system_version, gptEngineerTestToken);
       
-      // Fetch the latest tool output message from the trajectory
-      const { data: latestToolOutput, error: latestToolOutputError } = await supabase
-        .from('trajectory_messages')
-        .select('*')
-        .eq('run_id', availableRun.id)
-        .eq('role', 'tool_output')
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
+      // Fetch all messages from the project's trajectory
+      const latestMessagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
+      const latestMessagesQuery = query(latestMessagesRef, orderBy("created_at", "desc"));
+      const latestMessagesSnapshot = await getDocs(latestMessagesQuery);
+      
+      const filteredMessages = latestMessagesSnapshot.docs
+        .map(doc => ({ ...doc.data(), id: doc.id }))
+        .filter(msg => msg.role === 'assistant' && msg.channel?.type === 'instant-channel');
 
-      if (latestToolOutputError) {
-        console.error("Error fetching latest tool output:", latestToolOutputError);
-        throw latestToolOutputError;
-      }
-
-      if (latestToolOutput) {
-        console.log('Latest tool output message:', latestToolOutput.content);
+      if (filteredMessages.length > 0) {
+        const latestMessage = filteredMessages[0];
+        // Insert trajectory message for tool output
+        await supabase.rpc('add_trajectory_message', {
+          p_run_id: availableRun.id,
+          p_content: latestMessage.content,
+          p_role: 'tool_output'
+        });
+        console.log('Latest assistant message:', latestMessage.content);
       } else {
-        console.warn('No tool output message found in the trajectory');
+        console.warn('No matching messages found in the project trajectory');
       }
 
       console.log('Iteration completed successfully');
