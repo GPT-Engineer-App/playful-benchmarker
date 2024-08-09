@@ -60,10 +60,21 @@ Choose one of these options for every response, based on how a real user would i
     console.log('LLM Response:', JSON.stringify(data, null, 2));
 
     // Extract the content from the response
-    const content = data.content[0].text;
+    if (!data || !data.content || !Array.isArray(data.content) || data.content.length === 0) {
+      console.error('Unexpected response structure from Supabase LLM:', data);
+      throw new Error('Unexpected response structure from Supabase LLM');
+    }
+
+    const content = data.content[0]?.text;
+    if (typeof content !== 'string') {
+      console.error('Unexpected content type in Supabase LLM response:', data.content[0]);
+      throw new Error('Unexpected content type in Supabase LLM response');
+    }
+
     return content;
   } catch (error) {
     console.error('Error calling Supabase LLM:', error);
+    console.error('Full error object:', JSON.stringify(error, null, 2));
     throw error;
   }
 }
