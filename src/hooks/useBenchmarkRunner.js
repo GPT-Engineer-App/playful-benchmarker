@@ -85,6 +85,13 @@ const useBenchmarkRunner = () => {
       const nextAction = await callSupabaseLLM(scenario.prompt, messages, availableRun.llm_temperature);
       console.log('Next action:', nextAction);
 
+      // Insert trajectory message for impersonator
+      await supabase.rpc('add_trajectory_message', {
+        p_run_id: availableRun.id,
+        p_content: nextAction,
+        p_role: 'impersonator'
+      });
+
       if (nextAction.includes("<lov-scenario-finished/>")) {
         console.log('Scenario finished, updating run state to completed');
         await updateRun.mutateAsync({
@@ -112,6 +119,13 @@ const useBenchmarkRunner = () => {
       console.log('Sending chat message');
       const chatResponse = await sendChatMessage(availableRun.project_id, chatRequest, availableRun.system_version, gptEngineerTestToken);
       console.log('Chat response:', chatResponse);
+
+      // Insert trajectory message for tool output
+      await supabase.rpc('add_trajectory_message', {
+        p_run_id: availableRun.id,
+        p_content: JSON.stringify(chatResponse),
+        p_role: 'tool_output'
+      });
 
       // Add result
       console.log('Adding result to database');
