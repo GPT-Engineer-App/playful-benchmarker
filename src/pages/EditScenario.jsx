@@ -79,9 +79,23 @@ const EditScenario = () => {
 
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">Reviewers</h2>
-            {reviewers.map((reviewer, index) => (
-              <ReviewerDetails
-                key={reviewer.id}
+            {reviewers && reviewers.length > 0 ? (
+              reviewers.map((reviewer, index) => (
+                <ReviewerDetails
+                  key={reviewer.id}
+                  reviewer={reviewer}
+                  index={index}
+                  reviewDimensions={reviewDimensions}
+                  isLoadingDimensions={isLoadingDimensions}
+                  handleReviewerChange={handleReviewerChange}
+                  handleReviewerDimensionChange={handleReviewerDimensionChange}
+                  handleReviewerLLMTemperatureChange={handleReviewerLLMTemperatureChange}
+                  handleDeleteReviewer={handleDeleteReviewer}
+                />
+              ))
+            ) : (
+              <p>No reviewers found for this scenario.</p>
+            )}
                 reviewer={reviewer}
                 index={index}
                 reviewDimensions={reviewDimensions}
