@@ -166,7 +166,7 @@ const useBenchmarkRunner = () => {
         });
       }
     }
-  }, [updateRun, addResult]);
+  }, [updateRun]);
 
   useEffect(() => {
     const fetchUserSecrets = async () => {
