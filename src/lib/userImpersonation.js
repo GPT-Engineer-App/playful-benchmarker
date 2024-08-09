@@ -57,6 +57,18 @@ export const sendChatMessage = async (projectId, message, systemVersion) => {
   if (!response.ok) {
     throw new Error('Failed to send chat message');
   }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let result = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    result += decoder.decode(value, { stream: true });
+  }
+
+  return result;
 };
 
 // Function to handle initial user impersonation and project creation
