@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
-import { supabase, useUpdateRun, useAddResult } from '../integrations/supabase';
+import { supabase, useUpdateRun } from '../integrations/supabase';
 import { toast } from 'sonner';
-import { collection, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { callSupabaseLLM } from '../lib/anthropic';
 import { sendChatMessage } from '../lib/userImpersonation';
@@ -9,7 +9,6 @@ import { sendChatMessage } from '../lib/userImpersonation';
 const useBenchmarkRunner = () => {
   const [isRunning, setIsRunning] = useState(false);
   const updateRun = useUpdateRun();
-  const addResult = useAddResult();
 
   const handleSingleIteration = useCallback(async (gptEngineerTestToken) => {
     console.log('Starting single iteration');
@@ -125,17 +124,6 @@ const useBenchmarkRunner = () => {
         p_run_id: availableRun.id,
         p_content: JSON.stringify(chatResponse),
         p_role: 'tool_output'
-      });
-
-      // Add result
-      console.log('Adding result to database');
-      await addResult.mutateAsync({
-        run_id: availableRun.id,
-        reviewer_id: null,
-        result: {
-          type: 'chat_message_sent',
-          data: chatResponse,
-        },
       });
 
       console.log('Iteration completed successfully');
