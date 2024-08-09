@@ -57,7 +57,6 @@ export const sendChatMessage = async (projectId, message, systemVersion) => {
   if (!response.ok) {
     throw new Error('Failed to send chat message');
   }
-  return response.json();
 };
 
 // Function to handle initial user impersonation and project creation
