@@ -89,7 +89,6 @@ const EditScenario = () => {
                 handleReviewerChange={handleReviewerChange}
                 handleReviewerDimensionChange={handleReviewerDimensionChange}
                 handleReviewerLLMTemperatureChange={handleReviewerLLMTemperatureChange}
-                handleReviewerLLMModelChange={(value) => handleReviewerChange(index, { target: { name: 'llm_model', value } })}
                 handleDeleteReviewer={handleDeleteReviewer}
               />
             ))}

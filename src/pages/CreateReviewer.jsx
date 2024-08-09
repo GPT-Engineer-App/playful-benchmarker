@@ -70,7 +70,6 @@ const CreateReviewer = () => {
           handleReviewerChange={handleReviewerChange}
           handleReviewerDimensionChange={handleReviewerDimensionChange}
           handleReviewerLLMTemperatureChange={handleReviewerLLMTemperatureChange}
-          handleReviewerLLMModelChange={(value) => setReviewer((prev) => ({ ...prev, llm_model: value }))}
           handleSubmit={handleSubmit}
           submitButtonText="Create Reviewer"
         />
