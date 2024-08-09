@@ -78,7 +78,7 @@ const useBenchmarkRunner = () => {
       }
 
       const messages = trajectoryMessages.map(msg => ({
-        role: msg.role === "impersonator" ? "assistant" : "user",
+        role: msg.role === "impersonator" ? "user" : "assistant",
         content: msg.content
       }));
       console.log('Fetched messages:', messages);
