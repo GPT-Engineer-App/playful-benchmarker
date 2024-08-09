@@ -29,7 +29,7 @@ const EditScenario = () => {
     addReviewerField,
     handleDeleteReviewer,
     setScenario,
-    setReviewers,
+    setReviewers: setSpecificReviewers,
   } = useCreateScenarioForm();
 
   useEffect(() => {
@@ -41,9 +41,9 @@ const EditScenario = () => {
   useEffect(() => {
     if (reviewersData) {
       const scenarioReviewers = reviewersData.filter(reviewer => reviewer.scenario_id === id);
-      setReviewers(scenarioReviewers);
+      setSpecificReviewers(scenarioReviewers);
     }
-  }, [reviewersData, id, setReviewers]);
+  }, [reviewersData, id, setSpecificReviewers]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

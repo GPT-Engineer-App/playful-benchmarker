@@ -195,6 +195,7 @@ const useCreateScenarioForm = () => {
     setSpecificReviewers,
     existingReviewers,
     isLoadingReviewers,
+    setReviewers: setSpecificReviewers, // Add this line
   };
 };
 
