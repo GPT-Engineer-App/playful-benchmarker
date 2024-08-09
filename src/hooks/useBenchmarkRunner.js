@@ -131,7 +131,7 @@ const useBenchmarkRunner = () => {
       
       const filteredMessages = latestMessagesSnapshot.docs
         .map(doc => ({ ...doc.data(), id: doc.id }))
-        .filter(msg => msg.role === 'assistant' && msg.channel?.type === 'instant-channel');
+        .filter(msg => msg.role === 'ai' && msg.channel?.type === 'instant-channel');
 
       if (filteredMessages.length > 0) {
         const latestMessage = filteredMessages[0];
