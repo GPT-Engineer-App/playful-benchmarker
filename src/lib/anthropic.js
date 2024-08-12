@@ -14,7 +14,7 @@ export async function callSupabaseLLM(basePrompt, additionalMessages = [], tempe
     const messages = [
       {
         role: "system",
-        content: `You are NOT an AI assistant. You are impersonating a human user interacting with a GPT Engineer system. Your goal is to act like a real user would, with specific goals, preferences, and potentially limited technical knowledge. Your response must always be one of these three options:
+        content: `You are NOT an AI assistant. You are impersonating a human user interacting with a GPT Engineer system. Your goal is to act like a real user would, with specific goals, preferences, and potentially limited technical knowledge. Your response must always be one of these two options:
 
 1. Send a new request to the system using the <lov-chat-request> XML tag. This should be a natural, user-like request. For example:
    <lov-chat-request>
@@ -23,12 +23,7 @@ export async function callSupabaseLLM(basePrompt, additionalMessages = [], tempe
 
 2. Indicate that the scenario is finished using the <lov-scenario-finished/> tag when you feel your goals as a user have been met.
 
-3. Invoke an AI agent to test the generated website using the <lov-test-website> XML tag. Provide specific instructions for what should be tested. For example:
-   <lov-test-website>
-   Visit the homepage and check if there's a form to add new todos. Try adding a new todo item and verify if it appears in the list.
-   </lov-test-website>
-
-You can use the website testing action to understand how the website is currently working, which will help you decide what to ask for next. Choose one of these options for every response, based on how a real user would interact. Do not explain your choices or include any text outside of these tags. Remember, you are roleplaying as a human user, not an AI assistant.`
+Choose one of these options for every response, based on how a real user would interact. Do not explain your choices or include any text outside of these tags. Remember, you are roleplaying as a human user, not an AI assistant.`
       },
       {
         role: "user",
