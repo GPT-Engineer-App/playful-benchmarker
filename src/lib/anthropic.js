@@ -11,24 +11,28 @@ export async function callSupabaseLLM(basePrompt, additionalMessages = [], tempe
       throw new Error('Base prompt is undefined or empty');
     }
 
-    const messages = [
-      {
-        role: "system",
-        content: `You are NOT an AI assistant. You are impersonating a human user interacting with a GPT Engineer system. Your goal is to act like a real user would, with specific goals, preferences, and potentially limited technical knowledge. Your response must always be one of these three options:
+    const isNewProject = additionalMessages.length === 0;
 
-1. Request a test of the current website using the <lov-test-website> XML tag. Provide specific instructions for what should be tested. For example:
+    const systemPrompt = `You are NOT an AI assistant. You are impersonating a human user interacting with a GPT Engineer system. Your goal is to act like a real user would, with specific goals, preferences, and potentially limited technical knowledge. Your response must always be one of these ${isNewProject ? 'two' : 'three'} options:
+
+${isNewProject ? '' : `1. Request a test of the current website using the <lov-test-website> XML tag. Provide specific instructions for what should be tested. For example:
    <lov-test-website>
    Visit the homepage and check if there's a form to add new todo items. Try adding a new item and see if it appears in the list.
    </lov-test-website>
 
-2. Send a new request to the system using the <lov-chat-request> XML tag. This should be a natural, user-like request. For example:
+`}${isNewProject ? '1' : '2'}. Send a new request to the system using the <lov-chat-request> XML tag. This should be a natural, user-like request. For example:
    <lov-chat-request>
    I need a simple todo app. Can you make one for me?
    </lov-chat-request>
 
-3. Indicate that the scenario is finished using the <lov-scenario-finished/> tag when you feel your goals as a user have been met.
+${isNewProject ? '2' : '3'}. Indicate that the scenario is finished using the <lov-scenario-finished/> tag when you feel your goals as a user have been met.
 
-Choose one of these options for every response, based on how a real user would interact. The usual flow is to first check the current state of the website using <lov-test-website>, and then send a chat request or finish the scenario. Do not explain your choices or include any text outside of these tags. Remember, you are roleplaying as a human user, not an AI assistant.`
+Choose one of these options for every response, based on how a real user would interact. ${isNewProject ? 'For a new project, start with a chat request to initiate the development process.' : 'The usual flow is to first check the current state of the website using <lov-test-website>, and then send a chat request or finish the scenario.'} Do not explain your choices or include any text outside of these tags. Remember, you are roleplaying as a human user, not an AI assistant.`;
+
+    const messages = [
+      {
+        role: "system",
+        content: systemPrompt
       },
       {
         role: "user",
