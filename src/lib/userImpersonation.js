@@ -1,11 +1,38 @@
 import { callSupabaseLLM } from './anthropic';
 import { supabase } from '../integrations/supabase';
 
-// Function to test the website
-export const testWebsite = async (projectId, testInstructions, systemVersion, gptEngineerTestToken) => {
-  // TODO: Implement website testing functionality
-  console.warn('testWebsite function has not been implemented yet');
-  return 'Website testing not implemented';
+// Function to test the website using MultiOn through a proxy
+export const testWebsite = async (projectId, testInstructions) => {
+  try {
+    const secrets = await getUserSecrets();
+    const multionApiKey = secrets.MULTION_API_KEY;
+
+    if (!multionApiKey) {
+      throw new Error('MultiOn API key not found in user secrets');
+    }
+
+    const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/multion', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X_MULTION_API_KEY': multionApiKey,
+      },
+      body: JSON.stringify({
+        cmd: testInstructions,
+        url: `https://lov-p-${projectId}.fly.dev/`,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`MultiOn API request failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    return JSON.stringify(result);
+  } catch (error) {
+    console.error('Error in testWebsite:', error);
+    return `Error testing website: ${error.message}`;
+  }
 };
 
 // Function to retrieve user secrets
