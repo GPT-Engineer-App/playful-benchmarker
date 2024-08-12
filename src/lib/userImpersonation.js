@@ -4,18 +4,10 @@ import { supabase } from '../integrations/supabase';
 // Function to test the website using MultiOn through a proxy
 export const testWebsite = async (projectId, testInstructions) => {
   try {
-    const secrets = await getUserSecrets();
-    const multionApiKey = secrets.MULTION_API_KEY;
-
-    if (!multionApiKey) {
-      throw new Error('MultiOn API key not found in user secrets');
-    }
-
     const response = await fetch('https://jyltskwmiwqthebrpzxt.supabase.co/functions/v1/multion', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X_MULTION_API_KEY': multionApiKey,
       },
       body: JSON.stringify({
         cmd: testInstructions,

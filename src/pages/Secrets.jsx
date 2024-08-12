@@ -9,8 +9,6 @@ import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 
 const Secrets = () => {
-  const [openaiApiKey, setOpenaiApiKey] = useState("");
-  const [multionApiKey, setMultionApiKey] = useState("");
   const [gptEngineerTestToken, setGptEngineerTestToken] = useState("");
   const navigate = useNavigate();
   const { session } = useSupabaseAuth();
@@ -21,8 +19,6 @@ const Secrets = () => {
   useEffect(() => {
     if (existingSecrets && existingSecrets.length > 0) {
       const secrets = JSON.parse(existingSecrets[0].secret);
-      setOpenaiApiKey(secrets.OPENAI_API_KEY || "");
-      setMultionApiKey(secrets.MULTION_API_KEY || "");
       setGptEngineerTestToken(secrets.GPT_ENGINEER_TEST_TOKEN || "");
     }
   }, [existingSecrets]);
@@ -35,8 +31,6 @@ const Secrets = () => {
     }
 
     const newSecrets = {
-      ...(openaiApiKey && { OPENAI_API_KEY: openaiApiKey }),
-      ...(multionApiKey && { MULTION_API_KEY: multionApiKey }),
       ...(gptEngineerTestToken && { GPT_ENGINEER_TEST_TOKEN: gptEngineerTestToken }),
     };
 
@@ -69,24 +63,6 @@ const Secrets = () => {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <form onSubmit={handleSubmit} className="max-w-md mx-auto space-y-4">
-          <div>
-            <Label htmlFor="openai-api-key">OPENAI_API_KEY</Label>
-            <Input
-              id="openai-api-key"
-              type="password"
-              value={openaiApiKey}
-              onChange={(e) => setOpenaiApiKey(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="multion-api-key">MULTION_API_KEY</Label>
-            <Input
-              id="multion-api-key"
-              type="password"
-              value={multionApiKey}
-              onChange={(e) => setMultionApiKey(e.target.value)}
-            />
-          </div>
           <div>
             <Label htmlFor="gpt-engineer-test-token">GPT_ENGINEER_TEST_TOKEN</Label>
             <Input
