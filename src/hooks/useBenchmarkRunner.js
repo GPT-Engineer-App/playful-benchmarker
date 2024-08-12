@@ -131,6 +131,28 @@ const useBenchmarkRunner = () => {
         // Call the chat endpoint
         console.log('Sending chat message');
         await sendChatMessage(availableRun.project_id, chatRequest, availableRun.system_version, gptEngineerTestToken);
+
+        // Fetch all messages from the project's trajectory
+        const latestMessagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
+        const latestMessagesQuery = query(latestMessagesRef, orderBy("created_at", "desc"));
+        const latestMessagesSnapshot = await getDocs(latestMessagesQuery);
+        
+        const filteredMessages = latestMessagesSnapshot.docs
+          .map(doc => ({ ...doc.data(), id: doc.id }))
+          .filter(msg => msg.role === 'ai' && msg.channel?.type === 'instant-channel');
+
+        if (filteredMessages.length > 0) {
+          const latestMessage = filteredMessages[0];
+          // Insert trajectory message for tool output
+          await supabase.rpc('add_trajectory_message', {
+            p_run_id: availableRun.id,
+            p_content: latestMessage.content,
+            p_role: 'tool_output'
+          });
+          console.log('Latest assistant message:', latestMessage.content);
+        } else {
+          console.warn('No matching messages found in the project trajectory');
+        }
       } else {
         console.error("Unexpected assistant message format");
         await updateRun.mutateAsync({
@@ -138,28 +160,6 @@ const useBenchmarkRunner = () => {
           state: 'impersonator_failed',
         });
         throw new Error("Unexpected assistant message format");
-      }
-      
-      // Fetch all messages from the project's trajectory
-      const latestMessagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
-      const latestMessagesQuery = query(latestMessagesRef, orderBy("created_at", "desc"));
-      const latestMessagesSnapshot = await getDocs(latestMessagesQuery);
-      
-      const filteredMessages = latestMessagesSnapshot.docs
-        .map(doc => ({ ...doc.data(), id: doc.id }))
-        .filter(msg => msg.role === 'ai' && msg.channel?.type === 'instant-channel');
-
-      if (filteredMessages.length > 0) {
-        const latestMessage = filteredMessages[0];
-        // Insert trajectory message for tool output
-        await supabase.rpc('add_trajectory_message', {
-          p_run_id: availableRun.id,
-          p_content: latestMessage.content,
-          p_role: 'tool_output'
-        });
-        console.log('Latest assistant message:', latestMessage.content);
-      } else {
-        console.warn('No matching messages found in the project trajectory');
       }
 
       console.log('Iteration completed successfully');
