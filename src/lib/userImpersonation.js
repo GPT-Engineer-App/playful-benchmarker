@@ -1,6 +1,22 @@
 import { callSupabaseLLM } from './anthropic';
 import { supabase } from '../integrations/supabase';
 
+// Function to test the website
+export const testWebsite = async (projectId, testInstructions, systemVersion, gptEngineerTestToken) => {
+  const response = await fetch(`${systemVersion}/projects/${projectId}/test`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${gptEngineerTestToken}`,
+    },
+    body: JSON.stringify({ instructions: testInstructions }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to test website');
+  }
+  return await response.text();
+};
+
 // Function to retrieve user secrets
 const getUserSecrets = async () => {
   const { data: { session } } = await supabase.auth.getSession();

@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { supabase, useUpdateRun } from '../integrations/supabase';
 import { toast } from 'sonner';
 import { callSupabaseLLM } from '../lib/anthropic';
-import { sendChatMessage } from '../lib/userImpersonation';
+import { sendChatMessage, testWebsite } from '../lib/userImpersonation';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -107,8 +107,31 @@ const useBenchmarkRunner = () => {
         return;
       }
 
+      const testWebsiteMatch = nextAction.match(/<lov-test-website>([\s\S]*?)<\/lov-test-website>/);
       const chatRequestMatch = nextAction.match(/<lov-chat-request>([\s\S]*?)<\/lov-chat-request>/);
-      if (!chatRequestMatch) {
+
+      if (testWebsiteMatch) {
+        const testInstructions = testWebsiteMatch[1].trim();
+        console.log('Extracted test instructions:', testInstructions);
+
+        // Call the test website function
+        console.log('Testing website');
+        const testResult = await testWebsite(availableRun.project_id, testInstructions, availableRun.system_version, gptEngineerTestToken);
+
+        // Insert trajectory message for tool output
+        await supabase.rpc('add_trajectory_message', {
+          p_run_id: availableRun.id,
+          p_content: testResult,
+          p_role: 'tool_output'
+        });
+      } else if (chatRequestMatch) {
+        const chatRequest = chatRequestMatch[1].trim();
+        console.log('Extracted chat request:', chatRequest);
+
+        // Call the chat endpoint
+        console.log('Sending chat message');
+        await sendChatMessage(availableRun.project_id, chatRequest, availableRun.system_version, gptEngineerTestToken);
+      } else {
         console.error("Unexpected assistant message format");
         await updateRun.mutateAsync({
           id: availableRun.id,
@@ -116,13 +139,6 @@ const useBenchmarkRunner = () => {
         });
         throw new Error("Unexpected assistant message format");
       }
-
-      const chatRequest = chatRequestMatch[1].trim();
-      console.log('Extracted chat request:', chatRequest);
-
-      // Call the chat endpoint
-      console.log('Sending chat message');
-      await sendChatMessage(availableRun.project_id, chatRequest, availableRun.system_version, gptEngineerTestToken);
       
       // Fetch all messages from the project's trajectory
       const latestMessagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
