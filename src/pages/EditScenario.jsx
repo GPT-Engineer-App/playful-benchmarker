@@ -18,16 +18,16 @@ const EditScenario = () => {
 
   const {
     scenario,
-    reviewers,
+    specificReviewers,
     reviewDimensions,
     isLoadingDimensions,
     handleScenarioChange,
     handleLLMTemperatureChange,
-    handleReviewerChange,
-    handleReviewerDimensionChange,
-    handleReviewerLLMTemperatureChange,
-    addReviewerField,
-    handleDeleteReviewer,
+    handleSpecificReviewerChange,
+    handleSpecificReviewerDimensionChange,
+    handleSpecificReviewerLLMTemperatureChange,
+    addSpecificReviewerField,
+    handleDeleteSpecificReviewer,
     setScenario,
     setReviewers: setSpecificReviewers,
   } = useCreateScenarioForm();
@@ -50,8 +50,10 @@ const EditScenario = () => {
     try {
       await updateScenario.mutateAsync({ id, ...scenario });
       
-      for (const reviewer of reviewers) {
-        await updateReviewer.mutateAsync({ id: reviewer.id, ...reviewer });
+      if (Array.isArray(specificReviewers)) {
+        for (const reviewer of specificReviewers) {
+          await updateReviewer.mutateAsync({ id: reviewer.id, ...reviewer });
+        }
       }
 
       toast.success("Scenario updated successfully");
@@ -79,24 +81,24 @@ const EditScenario = () => {
 
           <div className="space-y-4">
             <h2 className="text-2xl font-bold">Reviewers</h2>
-            {reviewers && reviewers.length > 0 ? (
-              reviewers.map((reviewer, index) => (
+            {Array.isArray(specificReviewers) && specificReviewers.length > 0 ? (
+              specificReviewers.map((reviewer, index) => (
                 <ReviewerDetails
-                  key={reviewer.id}
+                  key={reviewer.id || index}
                   reviewer={reviewer}
                   index={index}
                   reviewDimensions={reviewDimensions}
                   isLoadingDimensions={isLoadingDimensions}
-                  handleReviewerChange={handleReviewerChange}
-                  handleReviewerDimensionChange={handleReviewerDimensionChange}
-                  handleReviewerLLMTemperatureChange={handleReviewerLLMTemperatureChange}
-                  handleDeleteReviewer={handleDeleteReviewer}
+                  handleReviewerChange={handleSpecificReviewerChange}
+                  handleReviewerDimensionChange={handleSpecificReviewerDimensionChange}
+                  handleReviewerLLMTemperatureChange={handleSpecificReviewerLLMTemperatureChange}
+                  handleDeleteReviewer={handleDeleteSpecificReviewer}
                 />
               ))
             ) : (
               <p>No reviewers found for this scenario.</p>
             )}
-            <Button type="button" onClick={addReviewerField}>Add Reviewer</Button>
+            <Button type="button" onClick={addSpecificReviewerField}>Add Reviewer</Button>
           </div>
 
           <Button type="submit" className="w-full">Update Scenario</Button>
