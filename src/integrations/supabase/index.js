@@ -134,6 +134,18 @@ export const useReviewers = () => useQuery({
     queryFn: () => fromSupabase(supabase.from('reviewers').select('*')),
 });
 
+export const useScenarioReviewers = (scenarioId) => useQuery({
+    queryKey: ['scenario_reviewers', scenarioId],
+    queryFn: () => fromSupabase(supabase
+        .from('scenario_reviewers')
+        .select(`
+            reviewer_id,
+            reviewers (*)
+        `)
+        .eq('scenario_id', scenarioId)),
+    enabled: !!scenarioId,
+});
+
 export const useGenericReviewers = () => useQuery({
     queryKey: ['genericReviewers'],
     queryFn: () => fromSupabase(supabase.from('reviewers').select('*').eq('is_generic', true)),
@@ -160,8 +172,22 @@ export const useAddScenarioReviewer = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (newScenarioReviewer) => fromSupabase(supabase.from('scenario_reviewers').insert([newScenarioReviewer])),
-        onSuccess: () => {
-            queryClient.invalidateQueries('scenarioReviewers');
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries(['scenario_reviewers', variables.scenario_id]);
+        },
+    });
+};
+
+export const useDeleteScenarioReviewer = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ scenario_id, reviewer_id }) => fromSupabase(
+            supabase.from('scenario_reviewers')
+                .delete()
+                .match({ scenario_id, reviewer_id })
+        ),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries(['scenario_reviewers', variables.scenario_id]);
         },
     });
 };

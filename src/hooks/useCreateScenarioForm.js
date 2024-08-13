@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseAuth } from "../integrations/supabase/auth";
-import { useAddBenchmarkScenario, useAddReviewer, useReviewDimensions, useReviewers, useAddScenarioReviewer } from "../integrations/supabase";
+import { useAddBenchmarkScenario, useAddReviewer, useReviewDimensions, useReviewers, useAddScenarioReviewer, useDeleteScenarioReviewer } from "../integrations/supabase";
 import { toast } from "sonner";
 
 const useCreateScenarioForm = () => {
@@ -12,6 +12,7 @@ const useCreateScenarioForm = () => {
   const { data: reviewDimensions, isLoading: isLoadingDimensions } = useReviewDimensions();
   const { data: existingReviewers, isLoading: isLoadingReviewers } = useReviewers();
   const addScenarioReviewer = useAddScenarioReviewer();
+  const deleteScenarioReviewer = useDeleteScenarioReviewer();
 
   const [scenario, setScenario] = useState(() => {
     const savedScenario = localStorage.getItem('draftScenario');

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import ScenarioDetails from "../components/ScenarioDetails";
 import ReviewerDetails from "../components/ReviewerDetails";
 import useCreateScenarioForm from "../hooks/useCreateScenarioForm";
-import { useBenchmarkScenario, useUpdateBenchmarkScenario, useReviewers, useUpdateReviewer } from "../integrations/supabase";
+import { useBenchmarkScenario, useUpdateBenchmarkScenario, useScenarioReviewers, useUpdateReviewer } from "../integrations/supabase";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 
@@ -12,7 +12,7 @@ const EditScenario = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: scenarioData, isLoading: isLoadingScenario } = useBenchmarkScenario(id);
-  const { data: reviewersData, isLoading: isLoadingReviewers } = useReviewers();
+  const { data: scenarioReviewersData, isLoading: isLoadingScenarioReviewers } = useScenarioReviewers(id);
   const updateScenario = useUpdateBenchmarkScenario();
   const updateReviewer = useUpdateReviewer();
 
@@ -39,11 +39,11 @@ const EditScenario = () => {
   }, [scenarioData, setScenario]);
 
   useEffect(() => {
-    if (reviewersData) {
-      const scenarioReviewers = reviewersData.filter(reviewer => reviewer.scenario_id === id);
-      setSpecificReviewers(scenarioReviewers);
+    if (scenarioReviewersData) {
+      const reviewers = scenarioReviewersData.map(sr => sr.reviewers);
+      setSpecificReviewers(reviewers);
     }
-  }, [reviewersData, id, setSpecificReviewers]);
+  }, [scenarioReviewersData, setSpecificReviewers]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -61,7 +61,7 @@ const EditScenario = () => {
     }
   };
 
-  if (isLoadingScenario || isLoadingReviewers) {
+  if (isLoadingScenario || isLoadingScenarioReviewers) {
     return <div>Loading...</div>;
   }
 
