@@ -17,9 +17,61 @@ CREATE INDEX idx_scenario_reviewers_reviewer_id ON scenario_reviewers(reviewer_i
 -- Add is_generic column to reviewers table
 ALTER TABLE reviewers ADD COLUMN is_generic BOOLEAN DEFAULT FALSE;
 
--- Add a new column to the runs table
+-- Add new columns to the runs table
 ALTER TABLE runs
-ADD COLUMN total_time_usage INTEGER DEFAULT 0;
+ADD COLUMN total_time_usage INTEGER DEFAULT 0,
+ADD COLUMN last_running_at TIMESTAMP WITH TIME ZONE;
+
+-- Create or replace a function to start a run transactionally and update last_running_at
+CREATE OR REPLACE FUNCTION start_paused_run(run_id UUID)
+RETURNS BOOLEAN AS $$
+DECLARE
+  current_state TEXT;
+  run_timeout INTEGER;
+  run_start_time TIMESTAMP;
+BEGIN
+  -- Start a transaction
+  BEGIN
+    -- Lock the row and get the current state, timeout, and start time
+    SELECT state, timeout, created_at INTO current_state, run_timeout, run_start_time
+    FROM runs
+    WHERE id = run_id
+    FOR UPDATE;
+
+    -- Check if the run has timed out
+    IF EXTRACT(EPOCH FROM (NOW() - run_start_time)) > run_timeout THEN
+      -- Update the state to 'timed_out'
+      UPDATE runs
+      SET state = 'timed_out'
+      WHERE id = run_id;
+      
+      RETURN FALSE;
+    -- Check if the state is 'paused'
+    ELSIF current_state = 'paused' THEN
+      -- Update the state to 'running' and set last_running_at
+      UPDATE runs
+      SET state = 'running', last_running_at = NOW()
+      WHERE id = run_id;
+      
+      RETURN TRUE;
+    ELSE
+      -- If the state is not 'paused', return false
+      RETURN FALSE;
+    END IF;
+  END;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create a function to reset runs that have been running for too long
+CREATE OR REPLACE FUNCTION reset_long_running_runs()
+RETURNS VOID AS $$
+BEGIN
+  UPDATE runs
+  SET state = 'paused'
+  WHERE state = 'running'
+    AND last_running_at < NOW() - INTERVAL '10 minutes';
+END;
+$$ LANGUAGE plpgsql;
 
 -- Create or replace a function to update the total_time_usage
 CREATE OR REPLACE FUNCTION update_run_time_usage(

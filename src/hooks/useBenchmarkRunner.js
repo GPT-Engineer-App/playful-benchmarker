@@ -239,13 +239,27 @@ const useBenchmarkRunner = () => {
       }
     };
 
-    // Run the first iteration immediately
+    const resetLongRunningRuns = async () => {
+      try {
+        await supabase.rpc('reset_long_running_runs');
+        console.log('Reset long-running runs');
+      } catch (error) {
+        console.error('Error resetting long-running runs:', error);
+      }
+    };
+
+    // Run the first iteration and reset long-running runs immediately
     runIteration();
+    resetLongRunningRuns();
 
-    // Set up the interval for subsequent iterations
-    const intervalId = setInterval(runIteration, 60000);
+    // Set up the intervals for subsequent iterations and resets
+    const iterationIntervalId = setInterval(runIteration, 60000);
+    const resetIntervalId = setInterval(resetLongRunningRuns, 300000); // Every 5 minutes
 
-    return () => clearInterval(intervalId);
+    return () => {
+      clearInterval(iterationIntervalId);
+      clearInterval(resetIntervalId);
+    };
   }, [handleSingleIteration]);
 
   return { isRunning };
