@@ -27,19 +27,21 @@ CREATE OR REPLACE FUNCTION start_paused_run(run_id UUID)
 RETURNS BOOLEAN AS $$
 DECLARE
   current_state TEXT;
-  run_timeout INTEGER;
+  scenario_timeout INTEGER;
   run_start_time TIMESTAMP;
 BEGIN
   -- Start a transaction
   BEGIN
-    -- Lock the row and get the current state, timeout, and start time
-    SELECT state, timeout, created_at INTO current_state, run_timeout, run_start_time
-    FROM runs
-    WHERE id = run_id
+    -- Lock the row and get the current state, scenario timeout, and start time
+    SELECT r.state, bs.timeout, r.created_at 
+    INTO current_state, scenario_timeout, run_start_time
+    FROM runs r
+    JOIN benchmark_scenarios bs ON r.scenario_id = bs.id
+    WHERE r.id = run_id
     FOR UPDATE;
 
     -- Check if the run has timed out
-    IF EXTRACT(EPOCH FROM (NOW() - run_start_time)) > run_timeout THEN
+    IF EXTRACT(EPOCH FROM (NOW() - run_start_time)) > scenario_timeout THEN
       -- Update the state to 'timed_out'
       UPDATE runs
       SET state = 'timed_out'
