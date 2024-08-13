@@ -111,7 +111,7 @@ const ReviewerDetails = ({
     <div>
       <Label>Weight</Label>
       <RadioGroup
-        value={reviewer.weight.toString()}
+        value={(reviewer.weight || 1).toString()}
         onValueChange={(value) => handleReviewerChange(index, { target: { name: 'weight', value } })}
         className="flex space-x-4 mt-2"
       >
