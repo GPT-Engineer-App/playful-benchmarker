@@ -23,8 +23,7 @@ const Index = () => {
       <main className="flex-grow container mx-auto px-4 py-8">
         {session ? (
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h2 className="text-3xl font-bold">Welcome, {session.user.email}</h2>
+            <div className="flex justify-end">
               <Button asChild variant="outline">
                 <Link to="/secrets">Manage Secrets</Link>
               </Button>
