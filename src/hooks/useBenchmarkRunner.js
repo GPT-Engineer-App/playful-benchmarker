@@ -62,9 +62,6 @@ const useBenchmarkRunner = () => {
     }
     console.log('Run started successfully');
 
-    const startTime = Date.now();
-    console.log('Starting iteration at:', new Date(startTime).toISOString());
-
     try {
       // Fetch project messages from Supabase trajectory table
       console.log('Fetching project messages from Supabase');
@@ -110,6 +107,8 @@ const useBenchmarkRunner = () => {
       const testWebsiteMatch = nextAction.match(/<lov-test-website>([\s\S]*?)<\/lov-test-website>/);
       const chatRequestMatch = nextAction.match(/<lov-chat-request>([\s\S]*?)<\/lov-chat-request>/);
 
+      let timeUsage = 0;
+
       if (testWebsiteMatch) {
         const testInstructions = testWebsiteMatch[1].trim();
         console.log('Extracted test instructions:', testInstructions);
@@ -128,9 +127,13 @@ const useBenchmarkRunner = () => {
         const chatRequest = chatRequestMatch[1].trim();
         console.log('Extracted chat request:', chatRequest);
 
-        // Call the chat endpoint
+        // Call the chat endpoint and measure the time
         console.log('Sending chat message');
+        const startTime = Date.now();
         await sendChatMessage(availableRun.project_id, chatRequest, availableRun.system_version, gptEngineerTestToken);
+        const endTime = Date.now();
+        timeUsage = Math.round((endTime - startTime) / 1000); // Convert to seconds
+        console.log(`Chat message sent in ${timeUsage} seconds`);
 
         // Fetch all messages from the project's trajectory
         const latestMessagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
@@ -164,27 +167,18 @@ const useBenchmarkRunner = () => {
 
       console.log('Iteration completed successfully');
       toast.success("Iteration completed successfully");
-    } catch (error) {
-      console.error("Error during iteration:", error);
-      toast.error(`Iteration failed: ${error.message}`);
-      await updateRun.mutateAsync({
-        id: availableRun.id,
-        state: 'impersonator_failed',
-      });
-    } finally {
-      const endTime = Date.now();
-      const timeUsage = Math.round((endTime - startTime) / 1000); // Convert to seconds
-      console.log(`Iteration completed in ${timeUsage} seconds`);
 
       // Update the total_time_usage in Supabase
-      console.log('Updating total time usage');
-      const { data, error } = await supabase
-        .rpc('update_run_time_usage', { 
-          run_id: availableRun.id, 
-          time_increment: timeUsage 
-        });
+      if (timeUsage > 0) {
+        console.log('Updating total time usage');
+        const { data, error } = await supabase
+          .rpc('update_run_time_usage', { 
+            run_id: availableRun.id, 
+            time_increment: timeUsage 
+          });
 
-      if (error) console.error('Error updating time usage:', error);
+        if (error) console.error('Error updating time usage:', error);
+      }
 
       // Check if the run has timed out
       console.log('Checking run state');
@@ -205,6 +199,13 @@ const useBenchmarkRunner = () => {
           state: 'paused',
         });
       }
+    } catch (error) {
+      console.error("Error during iteration:", error);
+      toast.error(`Iteration failed: ${error.message}`);
+      await updateRun.mutateAsync({
+        id: availableRun.id,
+        state: 'impersonator_failed',
+      });
     }
   }, [updateRun]);
 
