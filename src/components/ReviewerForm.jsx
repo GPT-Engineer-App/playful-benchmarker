@@ -14,10 +14,10 @@ const ReviewerForm = ({
   handleReviewerChange, 
   handleReviewerDimensionChange, 
   handleReviewerLLMTemperatureChange,
-  handleSubmit,
-  submitButtonText
+  submitButtonText,
+  onSubmit
 }) => (
-  <form onSubmit={handleSubmit} className="space-y-4">
+  <div className="space-y-4">
     <div>
       <Label htmlFor="dimension">Dimension</Label>
       <Select onValueChange={(value) => handleReviewerDimensionChange(value)} value={reviewer.dimension || "select_dimension"}>
@@ -111,8 +111,8 @@ const ReviewerForm = ({
         required
       />
     </div>
-    <Button type="submit" className="w-full">{submitButtonText}</Button>
-  </form>
+    <Button onClick={onSubmit} className="w-full">{submitButtonText}</Button>
+  </div>
 );
 
 export default ReviewerForm;

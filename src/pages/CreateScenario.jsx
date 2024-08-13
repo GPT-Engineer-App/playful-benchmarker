@@ -70,7 +70,7 @@ const CreateScenario = () => {
                     handleReviewerChange={(e) => handleSpecificReviewerChange(index, e)}
                     handleReviewerDimensionChange={(value) => handleSpecificReviewerDimensionChange(index, value)}
                     handleReviewerLLMTemperatureChange={(value) => handleSpecificReviewerLLMTemperatureChange(index, value)}
-                    handleSubmit={handleReviewerSubmit}
+                    onSubmit={handleReviewerSubmit}
                     submitButtonText="Save Reviewer"
                   />
                 ) : (
