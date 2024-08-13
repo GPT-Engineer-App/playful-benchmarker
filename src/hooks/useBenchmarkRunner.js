@@ -174,7 +174,7 @@ const useBenchmarkRunner = () => {
         const { data, error } = await supabase
           .rpc('update_run_time_usage', { 
             run_id: availableRun.id, 
-            time_increment: Math.round(timeUsage / 1000) // Convert milliseconds to seconds for database storage
+            time_increment: timeUsage // Store time usage in milliseconds
           });
 
         if (error) console.error('Error updating time usage:', error);
