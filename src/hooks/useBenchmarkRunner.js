@@ -132,8 +132,8 @@ const useBenchmarkRunner = () => {
         const startTime = Date.now();
         await sendChatMessage(availableRun.project_id, chatRequest, availableRun.system_version, gptEngineerTestToken);
         const endTime = Date.now();
-        timeUsage = Math.round((endTime - startTime) / 1000); // Convert to seconds
-        console.log(`Chat message sent in ${timeUsage} seconds`);
+        timeUsage = endTime - startTime; // Time in milliseconds
+        console.log(`Chat message sent in ${timeUsage} milliseconds`);
 
         // Fetch all messages from the project's trajectory
         const latestMessagesRef = collection(db, `projects/${availableRun.project_id}/trajectory`);
@@ -174,7 +174,7 @@ const useBenchmarkRunner = () => {
         const { data, error } = await supabase
           .rpc('update_run_time_usage', { 
             run_id: availableRun.id, 
-            time_increment: timeUsage 
+            time_increment: Math.round(timeUsage / 1000) // Convert milliseconds to seconds for database storage
           });
 
         if (error) console.error('Error updating time usage:', error);
