@@ -10,7 +10,6 @@ const useCreateScenarioForm = () => {
   const addBenchmarkScenario = useAddBenchmarkScenario();
   const addReviewer = useAddReviewer();
   const { data: reviewDimensions, isLoading: isLoadingDimensions } = useReviewDimensions();
-  const { data: existingReviewers, isLoading: isLoadingReviewers } = useReviewers();
   const addScenarioReviewer = useAddScenarioReviewer();
   const deleteScenarioReviewer = useDeleteScenarioReviewer();
 
@@ -91,10 +90,10 @@ const useCreateScenarioForm = () => {
     });
   };
 
-  const addSpecificReviewerField = (existingReviewer = null) => {
+  const addSpecificReviewerField = () => {
     setSpecificReviewers((prev) => [
       ...prev,
-      existingReviewer || {
+      {
         dimension: "",
         description: "",
         prompt: "",
@@ -194,9 +193,7 @@ const useCreateScenarioForm = () => {
     handleSubmit,
     setScenario,
     setSpecificReviewers,
-    existingReviewers,
-    isLoadingReviewers,
-    setReviewers: setSpecificReviewers, // Add this line
+    setReviewers: setSpecificReviewers,
   };
 };
 
