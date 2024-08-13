@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import ScenarioDetails from "../components/ScenarioDetails";
 import ReviewerForm from "../components/ReviewerForm";
@@ -31,11 +32,17 @@ const CreateScenario = () => {
   } = useCreateScenarioForm();
 
   const [activeReviewerIndex, setActiveReviewerIndex] = useState(null);
+  const [selectedExistingReviewer, setSelectedExistingReviewer] = useState(null);
   const { data: genericReviewers, isLoading: isLoadingGenericReviewers } = useGenericReviewers();
 
-  const handleAddSpecificReviewer = () => {
-    addSpecificReviewerField();
-    setActiveReviewerIndex(specificReviewers.length);
+  const handleReviewerSubmit = (e) => {
+    e.preventDefault();
+    if (activeReviewerIndex !== null) {
+      setActiveReviewerIndex(null);
+    } else {
+      addSpecificReviewerField();
+      setActiveReviewerIndex(specificReviewers.length);
+    }
   };
 
   return (
@@ -63,11 +70,8 @@ const CreateScenario = () => {
                     handleReviewerChange={(e) => handleSpecificReviewerChange(index, e)}
                     handleReviewerDimensionChange={(value) => handleSpecificReviewerDimensionChange(index, value)}
                     handleReviewerLLMTemperatureChange={(value) => handleSpecificReviewerLLMTemperatureChange(index, value)}
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      setActiveReviewerIndex(null);
-                    }}
-                    submitButtonText="Save"
+                    onSubmit={handleReviewerSubmit}
+                    submitButtonText="Save Reviewer"
                   />
                 ) : (
                   <div>
@@ -81,13 +85,38 @@ const CreateScenario = () => {
                 )}
               </div>
             ))}
-            <Button
-              type="button"
-              onClick={handleAddSpecificReviewer}
-              className="mt-4"
-            >
-              + Add Specific Reviewer
-            </Button>
+            {activeReviewerIndex === null && (
+              <div className="flex items-center space-x-2">
+                <Select
+                  onValueChange={(value) => setSelectedExistingReviewer(existingReviewers.find(r => r.id === value))}
+                  disabled={isLoadingReviewers}
+                >
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="Select existing reviewer" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {existingReviewers?.map((reviewer) => (
+                      <SelectItem key={reviewer.id} value={reviewer.id}>
+                        {reviewer.dimension}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (selectedExistingReviewer) {
+                      addSpecificReviewerField(selectedExistingReviewer);
+                    } else {
+                      setActiveReviewerIndex(specificReviewers.length);
+                    }
+                    setSelectedExistingReviewer(null);
+                  }}
+                >
+                  Add Specific Reviewer
+                </Button>
+              </div>
+            )}
           </div>
 
           <div className="space-y-4 mt-8">
