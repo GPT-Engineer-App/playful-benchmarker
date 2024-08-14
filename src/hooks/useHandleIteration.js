@@ -53,33 +53,35 @@ export const useHandleIteration = (updateRun) => {
       if (msg.role === "tool_output") {
         try {
           const content = JSON.parse(msg.content);
+          if (typeof content !== 'object' || !('result' in content)) {
+            throw new Error('Invalid tool output format');
+          }
+          const messageContent = [];
           if (content.screenshot) {
             const base64Image = await downloadAndEncodeImage(content.screenshot);
             if (base64Image) {
-              return [
-                {
-                  role: "user",
-                  content: [
-                    {
-                      type: "image",
-                      source: {
-                        type: "base64",
-                        media_type: "image/png",
-                        data: base64Image,
-                      },
-                    },
-                    { type: "text", text: "This is a screenshot of the current state of the website." },
-                  ],
+              messageContent.push({
+                type: "image",
+                source: {
+                  type: "base64",
+                  media_type: "image/png",
+                  data: base64Image,
                 },
-                {
-                  role: "user",
-                  content: content.result || "No result provided",
-                },
-              ];
+              });
+              messageContent.push({ type: "text", text: "This is a screenshot of the current state of the website." });
             }
           }
+          messageContent.push({ type: "text", text: content.result });
+          return {
+            role: "user",
+            content: messageContent,
+          };
         } catch (error) {
           console.error("Error parsing tool output:", error);
+          return {
+            role: "user",
+            content: "Error processing tool output: " + error.message,
+          };
         }
       }
       return {
@@ -87,11 +89,11 @@ export const useHandleIteration = (updateRun) => {
         content: msg.content,
       };
     }));
-    console.log('Fetched messages:', messages.flat());
+    console.log('Fetched messages:', messages);
 
     // Call OpenAI to get next user impersonation action
     console.log('Calling OpenAI for next action');
-    const nextAction = await callSupabaseLLM(scenario.prompt, messages.flat(), availableRun.llm_temperature);
+    const nextAction = await callSupabaseLLM(scenario.prompt, messages, availableRun.llm_temperature);
     console.log('Next action:', nextAction);
 
     // Insert trajectory message for impersonator
@@ -126,10 +128,16 @@ export const useHandleIteration = (updateRun) => {
       // Log the response from the testing tool
       console.log('Test result:', testResult);
 
+      // Ensure the test result is in the correct format
+      const formattedTestResult = {
+        result: typeof testResult === 'string' ? testResult : JSON.stringify(testResult),
+        screenshot: testResult.screenshot || null,
+      };
+
       // Insert trajectory message for tool output
       await supabase.rpc('add_trajectory_message', {
         p_run_id: availableRun.id,
-        p_content: JSON.stringify(testResult),
+        p_content: JSON.stringify(formattedTestResult),
         p_role: 'tool_output'
       });
     } else if (chatRequestMatch) {
@@ -158,7 +166,7 @@ export const useHandleIteration = (updateRun) => {
         // Insert trajectory message for tool output
         await supabase.rpc('add_trajectory_message', {
           p_run_id: availableRun.id,
-          p_content: latestMessage.content,
+          p_content: JSON.stringify({ result: latestMessage.content }),
           p_role: 'tool_output'
         });
         console.log('Latest assistant message:', latestMessage.content);
