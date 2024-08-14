@@ -122,6 +122,9 @@ export const useHandleIteration = (updateRun) => {
       // Call the test website function
       console.log('Testing website');
       const testResult = await testWebsite(availableRun.project_id, testInstructions, availableRun.system_version, gptEngineerTestToken);
+      
+      // Log the response from the testing tool
+      console.log('Test result:', testResult);
 
       // Insert trajectory message for tool output
       await supabase.rpc('add_trajectory_message', {
