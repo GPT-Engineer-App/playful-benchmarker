@@ -1,4 +1,4 @@
-import { supabase } from '../integrations/supabase/index.js';
+import { supabase } from '../integrations/supabase';
 
 export async function callSupabaseLLM(basePrompt, additionalMessages = [], temperature = 0.7) {
   try {

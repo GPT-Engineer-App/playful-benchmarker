@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import ScenarioDetails from "../components/ScenarioDetails";
 import useCreateScenarioForm from "../hooks/useCreateScenarioForm";
-import useAutoGenerate from "../hooks/useAutoGenerate";
 import { Button } from "@/components/ui/button";
 import Navbar from "../components/Navbar";
 
@@ -12,10 +11,7 @@ const CreateScenario = () => {
     handleScenarioChange,
     handleLLMTemperatureChange,
     handleSubmit,
-    setScenario,
   } = useCreateScenarioForm();
-
-  const { generateName, generateDescription, generatePrompt } = useAutoGenerate(scenario, setScenario);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -27,9 +23,6 @@ const CreateScenario = () => {
             scenario={scenario}
             handleScenarioChange={handleScenarioChange}
             handleLLMTemperatureChange={handleLLMTemperatureChange}
-            generateName={generateName}
-            generateDescription={generateDescription}
-            generatePrompt={generatePrompt}
           />
 
           <Button type="submit" className="w-full mt-8">Create Scenario</Button>
