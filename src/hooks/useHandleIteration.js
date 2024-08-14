@@ -33,10 +33,41 @@ export const useHandleIteration = (updateRun) => {
       throw trajectoryError;
     }
 
-    const messages = trajectoryMessages.map(msg => ({
-      role: msg.role === "impersonator" ? "assistant" : "user",
-      content: msg.content
-    }));
+    const messages = trajectoryMessages.map(msg => {
+      if (msg.role === "tool_output") {
+        try {
+          const content = JSON.parse(msg.content);
+          if (content.screenshot) {
+            return [
+              {
+                role: "user",
+                content: [
+                  {
+                    type: "image",
+                    source: {
+                      type: "base64",
+                      media_type: "image/png",
+                      data: content.screenshot,
+                    },
+                  },
+                  { type: "text", text: "This is a screenshot of the current state of the website." },
+                ],
+              },
+              {
+                role: "user",
+                content: content.result || "No result provided",
+              },
+            ];
+          }
+        } catch (error) {
+          console.error("Error parsing tool output:", error);
+        }
+      }
+      return {
+        role: msg.role === "impersonator" ? "assistant" : "user",
+        content: msg.content,
+      };
+    }).flat();
     console.log('Fetched messages:', messages);
 
     // Call OpenAI to get next user impersonation action
@@ -76,7 +107,7 @@ export const useHandleIteration = (updateRun) => {
       // Insert trajectory message for tool output
       await supabase.rpc('add_trajectory_message', {
         p_run_id: availableRun.id,
-        p_content: testResult,
+        p_content: JSON.stringify(testResult),
         p_role: 'tool_output'
       });
     } else if (chatRequestMatch) {

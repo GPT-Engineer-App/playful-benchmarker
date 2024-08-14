@@ -21,10 +21,10 @@ export const testWebsite = async (projectId, testInstructions) => {
     }
 
     const result = await response.json();
-    return JSON.stringify(result);
+    return result; // Return the full result object, including the screenshot field
   } catch (error) {
     console.error('Error in testWebsite:', error);
-    return `Error testing website: ${error.message}`;
+    return { error: `Error testing website: ${error.message}` };
   }
 };
 
