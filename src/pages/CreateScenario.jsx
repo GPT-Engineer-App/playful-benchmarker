@@ -3,6 +3,7 @@ import ScenarioDetails from "../components/ScenarioDetails";
 import useCreateScenarioForm from "../hooks/useCreateScenarioForm";
 import { Button } from "@/components/ui/button";
 import Navbar from "../components/Navbar";
+import { useGenerateText } from "../hooks/useGenerateText";
 
 const CreateScenario = () => {
   const navigate = useNavigate();
@@ -11,7 +12,25 @@ const CreateScenario = () => {
     handleScenarioChange,
     handleLLMTemperatureChange,
     handleSubmit,
+    setScenario,
   } = useCreateScenarioForm();
+
+  const { generateText, isGenerating } = useGenerateText();
+
+  const handleGenerateName = async () => {
+    const generatedName = await generateText("scenario_name");
+    setScenario(prev => ({ ...prev, name: generatedName }));
+  };
+
+  const handleGenerateDescription = async () => {
+    const generatedDescription = await generateText("scenario_description", scenario.name);
+    setScenario(prev => ({ ...prev, description: generatedDescription }));
+  };
+
+  const handleGeneratePrompt = async () => {
+    const generatedPrompt = await generateText("scenario_prompt", scenario.name, scenario.description);
+    setScenario(prev => ({ ...prev, prompt: generatedPrompt }));
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -23,6 +42,10 @@ const CreateScenario = () => {
             scenario={scenario}
             handleScenarioChange={handleScenarioChange}
             handleLLMTemperatureChange={handleLLMTemperatureChange}
+            handleGenerateName={handleGenerateName}
+            handleGenerateDescription={handleGenerateDescription}
+            handleGeneratePrompt={handleGeneratePrompt}
+            isGenerating={isGenerating}
           />
 
           <Button type="submit" className="w-full mt-8">Create Scenario</Button>
