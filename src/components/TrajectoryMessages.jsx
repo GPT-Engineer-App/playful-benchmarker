@@ -2,9 +2,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 const TrajectoryMessages = ({ runId }) => {
   const [messages, setMessages] = useState([]);
+  const [expandedMessages, setExpandedMessages] = useState({});
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -24,6 +27,49 @@ const TrajectoryMessages = ({ runId }) => {
     fetchMessages();
   }, [runId]);
 
+  const toggleMessage = (messageId) => {
+    setExpandedMessages(prev => ({
+      ...prev,
+      [messageId]: !prev[messageId]
+    }));
+  };
+
+  const renderContent = (message) => {
+    const content = message.role === 'tool_output' ? JSON.parse(message.content) : { result: message.content };
+    const lines = content.result.split('\n');
+    const isLarge = lines.length > 10;
+    const displayedContent = expandedMessages[message.id] || !isLarge ? content.result : lines.slice(0, 10).join('\n') + '\n...';
+
+    return (
+      <>
+        <p className="whitespace-pre-wrap">{displayedContent}</p>
+        {isLarge && (
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => toggleMessage(message.id)}
+            className="mt-2"
+          >
+            {expandedMessages[message.id] ? (
+              <>
+                <ChevronUp className="mr-2 h-4 w-4" />
+                Show Less
+              </>
+            ) : (
+              <>
+                <ChevronDown className="mr-2 h-4 w-4" />
+                Show More
+              </>
+            )}
+          </Button>
+        )}
+        {content.screenshot && (
+          <img src={content.screenshot} alt="Screenshot" className="mt-4 max-w-full h-auto" />
+        )}
+      </>
+    );
+  };
+
   return (
     <Card className="w-full mx-auto">
       <CardHeader>
@@ -34,35 +80,14 @@ const TrajectoryMessages = ({ runId }) => {
           {messages.map((message) => (
             <div key={message.id} className="mb-4 p-2 bg-gray-100 rounded-lg">
               <p className="font-semibold">{message.role === "impersonator" ? "AI" : "Tool Output"}</p>
-              {message.role === "tool_output" ? (
-                <ToolOutput content={message.content} />
-              ) : (
-                <p>{message.content}</p>
-              )}
-              <p className="text-sm text-gray-500">{new Date(message.created_at).toLocaleString()}</p>
+              {renderContent(message)}
+              <p className="text-sm text-gray-500 mt-2">{new Date(message.created_at).toLocaleString()}</p>
             </div>
           ))}
         </ScrollArea>
       </CardContent>
     </Card>
   );
-};
-
-const ToolOutput = ({ content }) => {
-  try {
-    const parsedContent = JSON.parse(content);
-    return (
-      <div>
-        {parsedContent.screenshot && (
-          <img src={parsedContent.screenshot} alt="Screenshot" className="mb-2 max-w-full h-auto" />
-        )}
-        <p>{parsedContent.result}</p>
-      </div>
-    );
-  } catch (error) {
-    console.error('Error parsing tool output:', error);
-    return <p>{content}</p>;
-  }
 };
 
 export default TrajectoryMessages;
