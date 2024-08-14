@@ -33,6 +33,7 @@ const ScenarioDetails = ({ scenario, handleScenarioChange, handleLLMTemperatureC
         value={scenario.prompt}
         onChange={handleScenarioChange}
         required
+        className="min-h-[200px]"
       />
     </div>
     <div>
