@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
@@ -76,15 +75,13 @@ const TrajectoryMessages = ({ runId }) => {
         <CardTitle>Trajectory Messages</CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[600px] w-full rounded-md border p-4">
-          {messages.map((message) => (
-            <div key={message.id} className="mb-4 p-2 bg-gray-100 rounded-lg">
-              <p className="font-semibold">{message.role === "impersonator" ? "AI" : "Tool Output"}</p>
-              {renderContent(message)}
-              <p className="text-sm text-gray-500 mt-2">{new Date(message.created_at).toLocaleString()}</p>
-            </div>
-          ))}
-        </ScrollArea>
+        {messages.map((message) => (
+          <div key={message.id} className="mb-4 p-2 bg-gray-100 rounded-lg">
+            <p className="font-semibold">{message.role === "impersonator" ? "AI" : "Tool Output"}</p>
+            {renderContent(message)}
+            <p className="text-sm text-gray-500 mt-2">{new Date(message.created_at).toLocaleString()}</p>
+          </div>
+        ))}
       </CardContent>
     </Card>
   );
