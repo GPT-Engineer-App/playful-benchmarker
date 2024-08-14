@@ -1,4 +1,4 @@
-import { Home, Info, LogIn, Key, UserPlus, PlusCircle, ListPlus, Edit, Play, UserCheck } from "lucide-react";
+import { Home, Info, LogIn, Key, UserPlus, PlusCircle, ListPlus, Edit, Play, UserCheck, FileText } from "lucide-react";
 import Index from "./pages/Index.jsx";
 import About from "./pages/About.jsx";
 import Login from "./pages/Login.jsx";
@@ -9,6 +9,7 @@ import CreateReviewDimension from "./pages/CreateReviewDimension.jsx";
 import EditScenario from "./pages/EditScenario.jsx";
 import StartBenchmark from "./pages/StartBenchmark.jsx";
 import CreateReviewer from "./pages/CreateReviewer.jsx";
+import RunResult from "./pages/RunResult.jsx";
 
 export const navItems = [
   {
@@ -70,5 +71,11 @@ export const navItems = [
     to: "/create-reviewer",
     icon: <UserCheck className="h-4 w-4" />,
     page: <CreateReviewer />,
+  },
+  {
+    title: "Run Result",
+    to: "/run-results/:id",
+    icon: <FileText className="h-4 w-4" />,
+    page: <RunResult />,
   },
 ];
