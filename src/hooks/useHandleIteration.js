@@ -4,6 +4,22 @@ import { sendChatMessage, testWebsite } from '../lib/userImpersonation';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
+const downloadAndEncodeImage = async (url) => {
+  try {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result.split(',')[1]);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Error downloading and encoding image:', error);
+    return null;
+  }
+};
+
 export const useHandleIteration = (updateRun) => {
   return async (availableRun, gptEngineerTestToken) => {
     // Fetch the scenario associated with this run
@@ -33,31 +49,34 @@ export const useHandleIteration = (updateRun) => {
       throw trajectoryError;
     }
 
-    const messages = trajectoryMessages.map(msg => {
+    const messages = await Promise.all(trajectoryMessages.map(async (msg) => {
       if (msg.role === "tool_output") {
         try {
           const content = JSON.parse(msg.content);
           if (content.screenshot) {
-            return [
-              {
-                role: "user",
-                content: [
-                  {
-                    type: "image",
-                    source: {
-                      type: "base64",
-                      media_type: "image/png",
-                      data: content.screenshot,
+            const base64Image = await downloadAndEncodeImage(content.screenshot);
+            if (base64Image) {
+              return [
+                {
+                  role: "user",
+                  content: [
+                    {
+                      type: "image",
+                      source: {
+                        type: "base64",
+                        media_type: "image/png",
+                        data: base64Image,
+                      },
                     },
-                  },
-                  { type: "text", text: "This is a screenshot of the current state of the website." },
-                ],
-              },
-              {
-                role: "user",
-                content: content.result || "No result provided",
-              },
-            ];
+                    { type: "text", text: "This is a screenshot of the current state of the website." },
+                  ],
+                },
+                {
+                  role: "user",
+                  content: content.result || "No result provided",
+                },
+              ];
+            }
           }
         } catch (error) {
           console.error("Error parsing tool output:", error);
@@ -67,12 +86,12 @@ export const useHandleIteration = (updateRun) => {
         role: msg.role === "impersonator" ? "assistant" : "user",
         content: msg.content,
       };
-    }).flat();
-    console.log('Fetched messages:', messages);
+    }));
+    console.log('Fetched messages:', messages.flat());
 
     // Call OpenAI to get next user impersonation action
     console.log('Calling OpenAI for next action');
-    const nextAction = await callSupabaseLLM(scenario.prompt, messages, availableRun.llm_temperature);
+    const nextAction = await callSupabaseLLM(scenario.prompt, messages.flat(), availableRun.llm_temperature);
     console.log('Next action:', nextAction);
 
     // Insert trajectory message for impersonator
