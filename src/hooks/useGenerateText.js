@@ -15,17 +15,24 @@ export const useGenerateText = () => {
         prompt: s.prompt
       })) || [];
 
-      let systemPrompt = 'You are an AI assistant helping to generate content for benchmark scenarios. Provide concise and relevant responses based on the given examples and instructions.';
+      const systemPrompt = `You are an AI assistant helping to generate content for benchmark scenarios. Your task is to generate either a name, description, or prompt based on the given instruction. Use the following examples as a reference for the style and content:
+
+${examples.map(s => `Name: ${s.name}
+Description: ${s.description}
+Prompt: ${s.prompt}`).join('\n\n')}
+
+Provide only the requested content without any additional text or explanations.`;
+
       let prompt = '';
       switch (type) {
         case 'scenario_name':
-          prompt = `Generate a name for a new benchmark scenario. Here are some examples:\n${examples.map(s => `- ${s.name}`).join('\n')}\nNew scenario name:`;
+          prompt = 'Generate a name for a new benchmark scenario.';
           break;
         case 'scenario_description':
-          prompt = `Generate a description for a benchmark scenario named "${name}". Here are some examples:\n${examples.map(s => `Name: ${s.name}\nDescription: ${s.description}`).join('\n\n')}\nDescription for "${name}":`;
+          prompt = `Generate a description for a benchmark scenario named "${name}".`;
           break;
         case 'scenario_prompt':
-          prompt = `Generate a prompt for a benchmark scenario named "${name}" with the following description: "${description}". Here are some examples:\n${examples.map(s => `Name: ${s.name}\nDescription: ${s.description}\nPrompt: ${s.prompt}`).join('\n\n')}\nPrompt for "${name}":`;
+          prompt = `Generate a prompt for a benchmark scenario named "${name}" with the following description: "${description}".`;
           break;
         default:
           throw new Error('Invalid generation type');
