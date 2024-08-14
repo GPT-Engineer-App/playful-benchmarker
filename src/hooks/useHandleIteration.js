@@ -71,7 +71,7 @@ export const useHandleIteration = (updateRun) => {
 
       // Call the test website function
       console.log('Testing website');
-      const { testResult, screenshot } = await testWebsite(availableRun.project_id, testInstructions, availableRun.system_version, gptEngineerTestToken);
+      const testResult = await testWebsite(availableRun.project_id, testInstructions, availableRun.system_version, gptEngineerTestToken);
 
       // Insert trajectory message for tool output
       await supabase.rpc('add_trajectory_message', {
@@ -79,14 +79,6 @@ export const useHandleIteration = (updateRun) => {
         p_content: testResult,
         p_role: 'tool_output'
       });
-
-      // If there's a screenshot, add it to the messages for the next LLM call
-      if (screenshot) {
-        messages.push({
-          role: "user",
-          content: `Here's a screenshot of the current state of the website: ${screenshot}`
-        });
-      }
     } else if (chatRequestMatch) {
       const chatRequest = chatRequestMatch[1].trim();
       console.log('Extracted chat request:', chatRequest);
