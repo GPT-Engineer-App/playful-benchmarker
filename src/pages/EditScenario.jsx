@@ -2,9 +2,8 @@ import { useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ScenarioDetails from "../components/ScenarioDetails";
-import ReviewerDetails from "../components/ReviewerDetails";
 import useCreateScenarioForm from "../hooks/useCreateScenarioForm";
-import { useBenchmarkScenario, useUpdateBenchmarkScenario, useScenarioReviewers, useUpdateReviewer } from "../integrations/supabase";
+import { useBenchmarkScenario, useUpdateBenchmarkScenario } from "../integrations/supabase";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 
@@ -12,24 +11,13 @@ const EditScenario = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: scenarioData, isLoading: isLoadingScenario } = useBenchmarkScenario(id);
-  const { data: scenarioReviewersData, isLoading: isLoadingScenarioReviewers } = useScenarioReviewers(id);
   const updateScenario = useUpdateBenchmarkScenario();
-  const updateReviewer = useUpdateReviewer();
 
   const {
     scenario,
-    specificReviewers,
-    reviewDimensions,
-    isLoadingDimensions,
     handleScenarioChange,
     handleLLMTemperatureChange,
-    handleSpecificReviewerChange,
-    handleSpecificReviewerDimensionChange,
-    handleSpecificReviewerLLMTemperatureChange,
-    addSpecificReviewerField,
-    handleDeleteSpecificReviewer,
     setScenario,
-    setSpecificReviewers,
   } = useCreateScenarioForm();
 
   useEffect(() => {
@@ -38,22 +26,10 @@ const EditScenario = () => {
     }
   }, [scenarioData, setScenario]);
 
-  useEffect(() => {
-    if (scenarioReviewersData) {
-      const reviewers = scenarioReviewersData.map(sr => sr.reviewers);
-      setSpecificReviewers(reviewers);
-    }
-  }, [scenarioReviewersData, setSpecificReviewers]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await updateScenario.mutateAsync({ id, ...scenario });
-      
-      for (const reviewer of specificReviewers) {
-        await updateReviewer.mutateAsync({ id: reviewer.id, ...reviewer });
-      }
-
       toast.success("Scenario updated successfully");
       navigate("/");
     } catch (error) {
@@ -61,7 +37,7 @@ const EditScenario = () => {
     }
   };
 
-  if (isLoadingScenario || isLoadingScenarioReviewers) {
+  if (isLoadingScenario) {
     return <div>Loading...</div>;
   }
 
@@ -76,28 +52,6 @@ const EditScenario = () => {
             handleScenarioChange={handleScenarioChange}
             handleLLMTemperatureChange={handleLLMTemperatureChange}
           />
-
-          <div className="space-y-4">
-            <h2 className="text-2xl font-bold">Reviewers</h2>
-            {specificReviewers && specificReviewers.length > 0 ? (
-              specificReviewers.map((reviewer, index) => (
-                <ReviewerDetails
-                  key={reviewer.id}
-                  reviewer={reviewer}
-                  index={index}
-                  reviewDimensions={reviewDimensions}
-                  isLoadingDimensions={isLoadingDimensions}
-                  handleReviewerChange={handleSpecificReviewerChange}
-                  handleReviewerDimensionChange={handleSpecificReviewerDimensionChange}
-                  handleReviewerLLMTemperatureChange={handleSpecificReviewerLLMTemperatureChange}
-                  handleDeleteReviewer={handleDeleteSpecificReviewer}
-                />
-              ))
-            ) : (
-              <p>No reviewers found for this scenario.</p>
-            )}
-            <Button type="button" onClick={addSpecificReviewerField}>Add Reviewer</Button>
-          </div>
 
           <Button type="submit" className="w-full">Update Scenario</Button>
         </form>
