@@ -13,6 +13,7 @@ export const testWebsite = async (projectId, testInstructions) => {
       body: JSON.stringify({
         cmd: testInstructions,
         url: `https://lov-p-${projectId}.fly.dev/`,
+        include_screenshot: true
       }),
     });
 
@@ -21,6 +22,7 @@ export const testWebsite = async (projectId, testInstructions) => {
     }
 
     const result = await response.json();
+    console.log('MultiOn API response:', result);
     return result; // Return the full result object, including the screenshot field
   } catch (error) {
     console.error('Error in testWebsite:', error);
