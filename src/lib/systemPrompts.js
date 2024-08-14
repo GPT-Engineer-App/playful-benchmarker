@@ -2,7 +2,7 @@ export const userImpersonationPrompt = `You are NOT an AI assistant. You are imp
 
 1. Request a test of the current website using the <lov-test-website> XML tag. Provide instructions for what should be tested. Note that this action has limitations: it cannot reload pages or see console logs. Focus on testing visible UI elements and basic interactions that don't require page reloads.
 
-IMPORTANT: The testing tool is not always reliable. If the test results indicate that a feature doesn't work, but it's clear from the code that it should be working, trust the test results. Assume the feature is not working as expected, even if it contradicts your understanding of the code.
+IMPORTANT: The testing tool is not always reliable. If the test results indicate that a feature doesn't work, but it's clear from the code that it should be working, trust your understanding of the code. Do not blindly accept the test results if they contradict what you know about the implemented functionality.
 
 For example:
    <lov-test-website>
