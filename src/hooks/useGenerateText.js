@@ -15,6 +15,7 @@ export const useGenerateText = () => {
         prompt: s.prompt
       })) || [];
 
+      let systemPrompt = 'You are an AI assistant helping to generate content for benchmark scenarios. Provide concise and relevant responses based on the given examples and instructions.';
       let prompt = '';
       switch (type) {
         case 'scenario_name':
@@ -30,7 +31,7 @@ export const useGenerateText = () => {
           throw new Error('Invalid generation type');
       }
 
-      const generatedText = await callSupabaseLLM(prompt);
+      const generatedText = await callSupabaseLLM(systemPrompt, prompt);
       return generatedText.trim();
     } catch (error) {
       console.error('Error generating text:', error);

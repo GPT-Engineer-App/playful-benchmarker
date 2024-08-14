@@ -3,6 +3,7 @@ import { callSupabaseLLM } from '../lib/anthropic';
 import { sendChatMessage, testWebsite } from '../lib/userImpersonation';
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { userImpersonationPrompt } from '../lib/systemPrompts';
 
 const downloadAndEncodeImage = async (url) => {
   try {
@@ -93,7 +94,7 @@ export const useHandleIteration = (updateRun) => {
 
     // Call OpenAI to get next user impersonation action
     console.log('Calling OpenAI for next action');
-    const nextAction = await callSupabaseLLM(scenario.prompt, messages, availableRun.llm_temperature);
+    const nextAction = await callSupabaseLLM(userImpersonationPrompt, scenario.prompt, messages, availableRun.llm_temperature);
     console.log('Next action:', nextAction);
 
     // Insert trajectory message for impersonator
