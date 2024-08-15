@@ -276,7 +276,7 @@ export const useAddBenchmarkScenario = () => {
     return useMutation({
         mutationFn: async (newScenario) => {
             console.log("Adding new scenario:", newScenario);
-            const { id, ...scenarioWithoutId } = newScenario; // Remove id from the input
+            const { id, reviewers, ...scenarioWithoutId } = newScenario; // Remove id and reviewers from the input
             const { data, error } = await supabase.from('benchmark_scenarios').insert([{
                 ...scenarioWithoutId,
                 timeout: scenarioWithoutId.timeout || 300 // Default to 5 minutes if not provided
@@ -290,6 +290,19 @@ export const useAddBenchmarkScenario = () => {
             if (!data) {
                 console.error("No data returned after adding scenario");
                 throw new Error("No data returned after adding scenario");
+            }
+            
+            // Add reviewers to scenario_reviewers table
+            if (reviewers && reviewers.length > 0) {
+                const scenarioReviewers = reviewers.map(reviewer => ({
+                    scenario_id: data.id,
+                    reviewer_id: reviewer.id
+                }));
+                const { error: reviewersError } = await supabase.from('scenario_reviewers').insert(scenarioReviewers);
+                if (reviewersError) {
+                    console.error("Error adding scenario reviewers:", reviewersError);
+                    throw reviewersError;
+                }
             }
             
             console.log("Successfully added scenario:", data);
@@ -307,12 +320,70 @@ export const useAddBenchmarkScenario = () => {
 export const useUpdateBenchmarkScenario = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('benchmark_scenarios').update({
-            ...updateData,
-            timeout: updateData.timeout || 300 // Default to 5 minutes if not provided
-        }).eq('id', id)),
+        mutationFn: async ({ id, reviewers, ...updateData }) => {
+            const { data, error } = await supabase.from('benchmark_scenarios').update({
+                ...updateData,
+                timeout: updateData.timeout || 300 // Default to 5 minutes if not provided
+            }).eq('id', id);
+
+            if (error) throw error;
+
+            // Update scenario reviewers
+            if (reviewers) {
+                // Delete existing reviewers
+                await supabase.from('scenario_reviewers').delete().eq('scenario_id', id);
+
+                // Add new reviewers
+                if (reviewers.length > 0) {
+                    const scenarioReviewers = reviewers.map(reviewer => ({
+                        scenario_id: id,
+                        reviewer_id: reviewer.id
+                    }));
+                    const { error: reviewersError } = await supabase.from('scenario_reviewers').insert(scenarioReviewers);
+                    if (reviewersError) throw reviewersError;
+                }
+            }
+
+            return data;
+        },
         onSuccess: () => {
             queryClient.invalidateQueries('benchmark_scenarios');
+        },
+    });
+};
+
+export const useScenarioReviewers = (scenarioId) => useQuery({
+    queryKey: ['scenario_reviewers', scenarioId],
+    queryFn: () => fromSupabase(supabase
+        .from('scenario_reviewers')
+        .select(`
+            reviewer_id,
+            reviewers (*)
+        `)
+        .eq('scenario_id', scenarioId)),
+    enabled: !!scenarioId,
+});
+
+export const useAddScenarioReviewer = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (newScenarioReviewer) => fromSupabase(supabase.from('scenario_reviewers').insert([newScenarioReviewer])),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries(['scenario_reviewers', variables.scenario_id]);
+        },
+    });
+};
+
+export const useDeleteScenarioReviewer = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ scenario_id, reviewer_id }) => fromSupabase(
+            supabase.from('scenario_reviewers')
+                .delete()
+                .match({ scenario_id, reviewer_id })
+        ),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries(['scenario_reviewers', variables.scenario_id]);
         },
     });
 };
