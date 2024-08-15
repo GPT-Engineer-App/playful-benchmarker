@@ -412,30 +412,6 @@ export const useDeleteScenarioReviewer = () => {
     });
 };
 
-export const useAddScenarioReviewer = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: (newScenarioReviewer) => fromSupabase(supabase.from('scenario_reviewers').insert([newScenarioReviewer])),
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries(['scenario_reviewers', variables.scenario_id]);
-        },
-    });
-};
-
-export const useDeleteScenarioReviewer = () => {
-    const queryClient = useQueryClient();
-    return useMutation({
-        mutationFn: ({ scenario_id, reviewer_id }) => fromSupabase(
-            supabase.from('scenario_reviewers')
-                .delete()
-                .match({ scenario_id, reviewer_id })
-        ),
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries(['scenario_reviewers', variables.scenario_id]);
-        },
-    });
-};
-
 export const useDeleteBenchmarkScenario = () => {
     const queryClient = useQueryClient();
     return useMutation({
