@@ -59,6 +59,12 @@ const useBenchmarkLogic = (selectedScenarios, scenarios, systemVersion, session)
         if (createRunError) throw new Error(`Failed to create run: ${createRunError.message}`);
 
         toast.success(`Benchmark created and paused for scenario: ${scenario.name}`);
+
+      // Update the run state to 'paused'
+      await updateRun.mutateAsync({
+        id: newRun.id,
+        state: 'paused',
+      });
       }
 
       toast.success("All benchmarks started successfully!");
