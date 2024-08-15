@@ -19,49 +19,35 @@ export const useSingleIteration = (updateRun) => {
     let testResults = [];
     let allMessages = [];
     
-    while (true) {
-      const { data: messages } = await supabase
-        .from('trajectory_messages')
-        .select('*')
-        .eq('run_id', runId)
-        .order('created_at', { ascending: true });
+    const { data: messages } = await supabase
+      .from('trajectory_messages')
+      .select('*')
+      .eq('run_id', runId)
+      .order('created_at', { ascending: true });
 
-      const currentMessages = [
-        ...messages.map(msg => ({
-          role: msg.role === 'impersonator' ? 'assistant' : 'user',
-          content: msg.content
-        })),
-        ...testResults.map(result => ({
-          role: 'user',
-          content: JSON.stringify(result)
-        }))
-      ];
+    const previousMessages = messages.map(msg => ({
+      role: msg.role === 'impersonator' ? 'assistant' : 'user',
+      content: msg.content
+    }));
 
-      reviewerResult = await callSupabaseLLM(
-        reviewerPrompt,
-        reviewer.prompt,
-        currentMessages,
-        reviewer.llm_temperature
-      );
+    const previousMessagesString = previousMessages
+      .map(msg => `${msg.role.toUpperCase()}: ${msg.content}`)
+      .join('\n\n');
 
-      allMessages.push({ role: 'assistant', content: reviewerResult });
+    const reviewerPromptWithHistory = `${previousMessagesString}
 
-      const testMatch = reviewerResult.match(/<lov-test-website>(.*?)<\/lov-test-website>/s);
-      if (testMatch) {
-        const testInstructions = testMatch[1].trim();
-        const { data: run } = await supabase
-          .from('runs')
-          .select('project_id')
-          .eq('id', runId)
-          .single();
-        
-        const testResult = await testWebsite(run.project_id, testInstructions, gptEngineerTestToken);
-        testResults.push(testResult);
-        allMessages.push({ role: 'user', content: JSON.stringify(testResult) });
-      } else {
-        break;
-      }
-    }
+Given the previous message history, your task is as described below:
+
+${reviewer.prompt}`;
+
+    reviewerResult = await callSupabaseLLM(
+      reviewerPrompt,
+      reviewerPromptWithHistory,
+      [],
+      reviewer.llm_temperature
+    );
+
+    allMessages.push({ role: 'assistant', content: reviewerResult });
 
     const scoreMatch = reviewerResult.match(/<lov-score>(.*?)<\/lov-score>/);
     if (scoreMatch) {
@@ -124,24 +110,6 @@ export const useSingleIteration = (updateRun) => {
       await handleIteration(availableRun, gptEngineerTestToken);
       console.log('Iteration completed successfully');
       toast.success("Iteration completed successfully");
-
-      // Check if the run is done
-      const { data: updatedRun } = await supabase
-        .from('runs')
-        .select('*')
-        .eq('id', availableRun.id)
-        .single();
-
-      if (updatedRun.state === 'done') {
-        console.log('Run done, starting reviewers');
-        const { data: reviewers } = await supabase
-          .from('scenario_reviewers')
-          .select('reviewers (*)')
-          .eq('scenario_id', updatedRun.scenario_id);
-
-        await runReviewers(availableRun.id, reviewers.map(r => r.reviewers), gptEngineerTestToken);
-        console.log('Reviewers done');
-      }
     } catch (error) {
       console.error("Error during iteration:", error);
       toast.error(`Iteration failed: ${error.message}`);
@@ -149,6 +117,24 @@ export const useSingleIteration = (updateRun) => {
         id: availableRun.id,
         state: 'impersonator_failed',
       });
+    }
+
+    // Check if the run is done
+    const { data: updatedRun } = await supabase
+      .from('runs')
+      .select('*')
+      .eq('id', availableRun.id)
+      .single();
+
+    if (updatedRun.state === 'done' || updatedRun.state === 'impersonator_failed') {
+      console.log('Run finished, starting reviewers');
+      const { data: reviewers } = await supabase
+        .from('scenario_reviewers')
+        .select('reviewers (*)')
+        .eq('scenario_id', updatedRun.scenario_id);
+
+      await runReviewers(availableRun.id, reviewers.map(r => r.reviewers), gptEngineerTestToken);
+      console.log('Reviewers done');
     }
 
     await updateRunState(availableRun);
