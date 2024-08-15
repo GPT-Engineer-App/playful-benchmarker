@@ -1,13 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseAuth } from "../integrations/supabase/auth";
-import { useAddBenchmarkScenario } from "../integrations/supabase";
+import { useAddBenchmarkScenario, useUpdateBenchmarkScenario, useAddScenarioReviewer, useDeleteScenarioReviewer } from "../integrations/supabase";
 import { toast } from "sonner";
 
 const useCreateScenarioForm = () => {
   const navigate = useNavigate();
   const { session } = useSupabaseAuth();
   const addBenchmarkScenario = useAddBenchmarkScenario();
+  const updateBenchmarkScenario = useUpdateBenchmarkScenario();
+  const addScenarioReviewer = useAddScenarioReviewer();
+  const deleteScenarioReviewer = useDeleteScenarioReviewer();
 
   const [scenario, setScenario] = useState(() => {
     const savedScenario = localStorage.getItem('draftScenario');
@@ -19,6 +22,8 @@ const useCreateScenarioForm = () => {
       timeout: 300,
     };
   });
+
+  const [reviewers, setReviewers] = useState([]);
 
   const saveDraft = useCallback(() => {
     localStorage.setItem('draftScenario', JSON.stringify(scenario));
@@ -41,6 +46,21 @@ const useCreateScenarioForm = () => {
     setScenario((prev) => ({ ...prev, llm_temperature: value[0] }));
   };
 
+  const handleAddReviewer = () => {
+    setReviewers([...reviewers, { dimension: "", description: "", prompt: "", weight: 1, llm_temperature: 0.5, run_count: 1 }]);
+  };
+
+  const handleReviewerChange = (index, e) => {
+    const { name, value } = e.target;
+    const updatedReviewers = [...reviewers];
+    updatedReviewers[index] = { ...updatedReviewers[index], [name]: value };
+    setReviewers(updatedReviewers);
+  };
+
+  const handleDeleteReviewer = (index) => {
+    setReviewers(reviewers.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!session) {
@@ -49,38 +69,54 @@ const useCreateScenarioForm = () => {
     }
 
     try {
-      console.log("Attempting to create scenario:", scenario);
-      const result = await addBenchmarkScenario.mutateAsync(scenario);
-      console.log("Scenario creation response:", result);
-      
-      if (result.error) {
-        throw new Error("Failed to create scenario: " + result.error.message);
+      let scenarioId;
+      if (scenario.id) {
+        // Update existing scenario
+        await updateBenchmarkScenario.mutateAsync(scenario);
+        scenarioId = scenario.id;
+      } else {
+        // Create new scenario
+        const result = await addBenchmarkScenario.mutateAsync(scenario);
+        scenarioId = result.data.id;
       }
-      
-      const createdScenarioId = result.data?.id || result.id;
-      if (!createdScenarioId) {
-        throw new Error("Failed to create scenario: No ID returned");
+
+      // Handle reviewers
+      for (const reviewer of reviewers) {
+        if (reviewer.id) {
+          // Update existing reviewer
+          await addScenarioReviewer.mutateAsync({ scenario_id: scenarioId, reviewer_id: reviewer.id });
+        } else {
+          // Add new reviewer
+          await addScenarioReviewer.mutateAsync({ scenario_id: scenarioId, reviewer: reviewer });
+        }
       }
-      
-      console.log("Created scenario ID:", createdScenarioId);
+
+      // Delete removed reviewers
+      const existingReviewerIds = reviewers.filter(r => r.id).map(r => r.id);
+      await deleteScenarioReviewer.mutateAsync({ scenario_id: scenarioId, reviewer_ids: existingReviewerIds });
 
       // Clear the draft from localStorage
       localStorage.removeItem('draftScenario');
 
-      toast.success("Scenario created successfully");
+      toast.success(scenario.id ? "Scenario updated successfully" : "Scenario created successfully");
       navigate("/");
     } catch (error) {
-      console.error("Error creating scenario:", error);
-      toast.error(`Failed to create scenario: ${error.message}`);
+      console.error("Error creating/updating scenario:", error);
+      toast.error(`Failed to ${scenario.id ? 'update' : 'create'} scenario: ${error.message}`);
     }
   };
 
   return {
     scenario,
+    reviewers,
     handleScenarioChange,
     handleLLMTemperatureChange,
     handleSubmit,
     setScenario,
+    setReviewers,
+    handleAddReviewer,
+    handleReviewerChange,
+    handleDeleteReviewer,
   };
 };
 
