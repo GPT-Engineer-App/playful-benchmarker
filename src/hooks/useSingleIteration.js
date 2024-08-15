@@ -132,7 +132,7 @@ export const useSingleIteration = (updateRun) => {
         .eq('id', availableRun.id)
         .single();
 
-      if (updatedRun.state === 'done') {
+      if (updatedRun.state === 'completed') {
         console.log('Run completed, starting reviewers');
         const { data: reviewers } = await supabase
           .from('scenario_reviewers')

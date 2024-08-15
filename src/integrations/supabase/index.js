@@ -356,7 +356,7 @@ export const useAddRun = () => {
     return useMutation({
         mutationFn: (newRun) => fromSupabase(supabase.from('runs').insert([{
             ...newRun,
-            state: newRun.state || 'paused'
+            state: newRun.state || 'running'
         }])),
         onSuccess: () => {
             queryClient.invalidateQueries('runs');
@@ -369,7 +369,7 @@ export const useUpdateRun = () => {
     return useMutation({
         mutationFn: ({ id, ...updateData }) => fromSupabase(supabase.from('runs').update({
             ...updateData,
-            state: updateData.state || 'paused'
+            state: updateData.state || 'running'
         }).eq('id', id)),
         onSuccess: () => {
             queryClient.invalidateQueries('runs');
