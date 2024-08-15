@@ -24,7 +24,7 @@ const RunResult = () => {
   if (resultsError) return <div>Error loading results: {resultsError.message}</div>;
 
   const averageScores = results.reduce((acc, result) => {
-    const dimension = result.reviewer.dimension;
+    const dimension = result.reviewer?.dimension || 'Unknown';
     if (!acc[dimension]) {
       acc[dimension] = { total: 0, count: 0 };
     }
