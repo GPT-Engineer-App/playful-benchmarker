@@ -4,7 +4,6 @@ import useCreateScenarioForm from "../hooks/useCreateScenarioForm";
 import { Button } from "@/components/ui/button";
 import Navbar from "../components/Navbar";
 import { useGenerateText } from "../hooks/useGenerateText";
-import { useReviewDimensions } from "../integrations/supabase";
 
 const CreateScenario = () => {
   const navigate = useNavigate();
@@ -14,14 +13,9 @@ const CreateScenario = () => {
     handleLLMTemperatureChange,
     handleSubmit,
     setScenario,
-    reviewers,
-    handleAddReviewer,
-    handleReviewerChange,
-    handleDeleteReviewer,
   } = useCreateScenarioForm();
 
   const { generateText, isGenerating } = useGenerateText();
-  const { data: reviewDimensions, isLoading: isLoadingDimensions } = useReviewDimensions();
 
   const handleGenerateName = async () => {
     const generatedName = await generateText("scenario_name");
@@ -52,12 +46,6 @@ const CreateScenario = () => {
             handleGenerateDescription={handleGenerateDescription}
             handleGeneratePrompt={handleGeneratePrompt}
             isGenerating={isGenerating}
-            reviewers={reviewers}
-            handleAddReviewer={handleAddReviewer}
-            handleReviewerChange={handleReviewerChange}
-            handleDeleteReviewer={handleDeleteReviewer}
-            reviewDimensions={reviewDimensions}
-            isLoadingDimensions={isLoadingDimensions}
           />
 
           <Button type="submit" className="w-full mt-8">Create Scenario</Button>

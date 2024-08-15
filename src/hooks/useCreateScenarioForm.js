@@ -1,16 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSupabaseAuth } from "../integrations/supabase/auth";
-import { useAddBenchmarkScenario, useUpdateBenchmarkScenario, useAddScenarioReviewer, useDeleteScenarioReviewer } from "../integrations/supabase";
+import { useAddBenchmarkScenario } from "../integrations/supabase";
 import { toast } from "sonner";
 
 const useCreateScenarioForm = () => {
   const navigate = useNavigate();
   const { session } = useSupabaseAuth();
   const addBenchmarkScenario = useAddBenchmarkScenario();
-  const updateBenchmarkScenario = useUpdateBenchmarkScenario();
-  const addScenarioReviewer = useAddScenarioReviewer();
-  const deleteScenarioReviewer = useDeleteScenarioReviewer();
 
   const [scenario, setScenario] = useState(() => {
     const savedScenario = localStorage.getItem('draftScenario');
@@ -22,8 +19,6 @@ const useCreateScenarioForm = () => {
       timeout: 300,
     };
   });
-
-  const [reviewers, setReviewers] = useState([]);
 
   const saveDraft = useCallback(() => {
     localStorage.setItem('draftScenario', JSON.stringify(scenario));
@@ -46,28 +41,6 @@ const useCreateScenarioForm = () => {
     setScenario((prev) => ({ ...prev, llm_temperature: value[0] }));
   };
 
-  const handleAddReviewer = () => {
-    setReviewers([...reviewers, {
-      dimension: "",
-      description: "",
-      prompt: "",
-      weight: 1,
-      llm_temperature: 0,
-      run_count: 1,
-    }]);
-  };
-
-  const handleReviewerChange = (index, e) => {
-    const { name, value } = e.target;
-    const updatedReviewers = [...reviewers];
-    updatedReviewers[index] = { ...updatedReviewers[index], [name]: value };
-    setReviewers(updatedReviewers);
-  };
-
-  const handleDeleteReviewer = (index) => {
-    setReviewers(reviewers.filter((_, i) => i !== index));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!session) {
@@ -76,55 +49,29 @@ const useCreateScenarioForm = () => {
     }
 
     try {
-      let scenarioId = scenario.id;
-      if (!scenarioId) {
-        const result = await addBenchmarkScenario.mutateAsync(scenario);
-        scenarioId = result.data.id;
-      } else {
-        await updateBenchmarkScenario.mutateAsync({ id: scenarioId, ...scenario });
+      console.log("Attempting to create scenario:", scenario);
+      const result = await addBenchmarkScenario.mutateAsync(scenario);
+      console.log("Scenario creation response:", result);
+      
+      if (result.error) {
+        throw new Error("Failed to create scenario: " + result.error.message);
       }
-
-      // Handle reviewers
-      for (const reviewer of reviewers) {
-        if (reviewer.id) {
-          // Update existing reviewer
-          await addScenarioReviewer.mutateAsync({
-            scenario_id: scenarioId,
-            reviewer_id: reviewer.id,
-            ...reviewer
-          });
-        } else {
-          // Add new reviewer
-          await addScenarioReviewer.mutateAsync({
-            scenario_id: scenarioId,
-            ...reviewer
-          });
-        }
+      
+      const createdScenarioId = result.data?.id || result.id;
+      if (!createdScenarioId) {
+        throw new Error("Failed to create scenario: No ID returned");
       }
-
-      // Delete removed reviewers
-      if (scenario.id) {
-        const existingReviewerIds = new Set(reviewers.map(r => r.id).filter(Boolean));
-        const { data: currentReviewers } = await supabase
-          .from('scenario_reviewers')
-          .select('reviewer_id')
-          .eq('scenario_id', scenario.id);
-        
-        for (const { reviewer_id } of currentReviewers) {
-          if (!existingReviewerIds.has(reviewer_id)) {
-            await deleteScenarioReviewer.mutateAsync({ scenario_id: scenario.id, reviewer_id });
-          }
-        }
-      }
+      
+      console.log("Created scenario ID:", createdScenarioId);
 
       // Clear the draft from localStorage
       localStorage.removeItem('draftScenario');
 
-      toast.success(scenarioId ? "Scenario updated successfully" : "Scenario created successfully");
+      toast.success("Scenario created successfully");
       navigate("/");
     } catch (error) {
-      console.error("Error creating/updating scenario:", error);
-      toast.error(`Failed to create/update scenario: ${error.message}`);
+      console.error("Error creating scenario:", error);
+      toast.error(`Failed to create scenario: ${error.message}`);
     }
   };
 
@@ -134,11 +81,6 @@ const useCreateScenarioForm = () => {
     handleLLMTemperatureChange,
     handleSubmit,
     setScenario,
-    reviewers,
-    setReviewers,
-    handleAddReviewer,
-    handleReviewerChange,
-    handleDeleteReviewer,
   };
 };
 
