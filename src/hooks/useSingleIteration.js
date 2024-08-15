@@ -6,6 +6,7 @@ import { useHandleIteration } from './useHandleIteration';
 import { useUpdateRunState } from './useUpdateRunState';
 import { callSupabaseLLM } from '../lib/anthropic';
 import { reviewerPrompt } from '../lib/systemPrompts';
+import { testWebsite } from '../lib/userImpersonation';
 
 export const useSingleIteration = (updateRun) => {
   const { fetchUserSecrets } = useUserSecrets();
@@ -13,35 +14,67 @@ export const useSingleIteration = (updateRun) => {
   const handleIteration = useHandleIteration(updateRun);
   const updateRunState = useUpdateRunState(updateRun);
 
-  const runReviewers = async (runId, reviewers) => {
-    for (const reviewer of reviewers) {
+  const runReviewer = async (runId, reviewer, gptEngineerTestToken) => {
+    let reviewerResult;
+    let testResults = [];
+    
+    while (true) {
       const { data: messages } = await supabase
         .from('trajectory_messages')
         .select('*')
         .eq('run_id', runId)
         .order('created_at', { ascending: true });
 
-      const reviewerResult = await callSupabaseLLM(
-        reviewerPrompt,
-        reviewer.prompt,
-        messages.map(msg => ({
+      const allMessages = [
+        ...messages.map(msg => ({
           role: msg.role === 'impersonator' ? 'assistant' : 'user',
           content: msg.content
         })),
+        ...testResults.map(result => ({
+          role: 'user',
+          content: JSON.stringify(result)
+        }))
+      ];
+
+      reviewerResult = await callSupabaseLLM(
+        reviewerPrompt,
+        reviewer.prompt,
+        allMessages,
         reviewer.llm_temperature
       );
 
-      const scoreMatch = reviewerResult.match(/<lov-score>(.*?)<\/lov-score>/);
-      if (scoreMatch) {
-        const score = parseFloat(scoreMatch[1]);
-        await supabase.from('results').insert({
-          run_id: runId,
-          reviewer_id: reviewer.id,
-          score: score
-        });
+      const testMatch = reviewerResult.match(/<lov-test-website>(.*?)<\/lov-test-website>/s);
+      if (testMatch) {
+        const testInstructions = testMatch[1].trim();
+        const { data: run } = await supabase
+          .from('runs')
+          .select('project_id')
+          .eq('id', runId)
+          .single();
+        
+        const testResult = await testWebsite(run.project_id, testInstructions, gptEngineerTestToken);
+        testResults.push(testResult);
       } else {
-        console.error(`Reviewer ${reviewer.id} did not provide a valid score`);
+        break;
       }
+    }
+
+    const scoreMatch = reviewerResult.match(/<lov-score>(.*?)<\/lov-score>/);
+    if (scoreMatch) {
+      const score = parseFloat(scoreMatch[1]);
+      await supabase.from('results').insert({
+        run_id: runId,
+        reviewer_id: reviewer.id,
+        score: score
+      });
+    } else {
+      console.error(`Reviewer ${reviewer.id} did not provide a valid score`);
+    }
+  };
+
+  const runReviewers = async (runId, reviewers, gptEngineerTestToken) => {
+    for (const reviewer of reviewers) {
+      await runReviewer(runId, reviewer, gptEngineerTestToken);
     }
   };
 
@@ -99,7 +132,7 @@ export const useSingleIteration = (updateRun) => {
           .select('reviewers (*)')
           .eq('scenario_id', updatedRun.scenario_id);
 
-        await runReviewers(availableRun.id, reviewers.map(r => r.reviewers));
+        await runReviewers(availableRun.id, reviewers.map(r => r.reviewers), gptEngineerTestToken);
         console.log('Reviewers completed');
       }
     } catch (error) {
