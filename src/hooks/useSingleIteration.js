@@ -125,22 +125,22 @@ export const useSingleIteration = (updateRun) => {
       console.log('Iteration completed successfully');
       toast.success("Iteration completed successfully");
 
-      // Check if the run is completed
+      // Check if the run is done
       const { data: updatedRun } = await supabase
         .from('runs')
         .select('*')
         .eq('id', availableRun.id)
         .single();
 
-      if (updatedRun.state === 'completed') {
-        console.log('Run completed, starting reviewers');
+      if (updatedRun.state === 'done') {
+        console.log('Run done, starting reviewers');
         const { data: reviewers } = await supabase
           .from('scenario_reviewers')
           .select('reviewers (*)')
           .eq('scenario_id', updatedRun.scenario_id);
 
         await runReviewers(availableRun.id, reviewers.map(r => r.reviewers), gptEngineerTestToken);
-        console.log('Reviewers completed');
+        console.log('Reviewers done');
       }
     } catch (error) {
       console.error("Error during iteration:", error);

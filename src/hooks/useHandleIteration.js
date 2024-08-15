@@ -105,10 +105,10 @@ export const useHandleIteration = (updateRun) => {
     });
 
     if (nextAction.includes("<lov-scenario-finished/>")) {
-      console.log('Scenario finished, updating run state to completed');
+      console.log('Scenario finished, updating run state to done');
       await updateRun.mutateAsync({
         id: availableRun.id,
-        state: 'completed',
+        state: 'done',
       });
       return;
     }
