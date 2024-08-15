@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import TrajectoryMessages from '../components/TrajectoryMessages';
 import ReviewerResults from '../components/ReviewerResults';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+const getScoreColor = (score) => {
+  if (score >= 8) return 'bg-green-500';
+  if (score >= 6) return 'bg-yellow-500';
+  if (score >= 4) return 'bg-orange-500';
+  return 'bg-red-500';
+};
 
 const RunResult = () => {
   const { id } = useParams();
@@ -27,9 +33,9 @@ const RunResult = () => {
     return acc;
   }, {});
 
-  const chartData = Object.entries(averageScores).map(([dimension, { total, count }]) => ({
+  const scoreData = Object.entries(averageScores).map(([dimension, { total, count }]) => ({
     dimension,
-    averageScore: total / count
+    averageScore: (total / count).toFixed(2)
   }));
 
   return (
@@ -64,16 +70,19 @@ const RunResult = () => {
             <CardTitle>Average Scores by Dimension</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="h-[400px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="dimension" />
-                  <YAxis domain={[0, 10]} />
-                  <Tooltip />
-                  <Bar dataKey="averageScore" fill="#8884d8" />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="space-y-4">
+              {scoreData.map(({ dimension, averageScore }) => (
+                <div key={dimension} className="flex items-center">
+                  <div className="w-1/4 font-semibold">{dimension}</div>
+                  <div className="w-3/4 flex items-center">
+                    <div 
+                      className={`h-6 ${getScoreColor(averageScore)}`} 
+                      style={{ width: `${averageScore * 10}%` }}
+                    ></div>
+                    <span className="ml-2">{averageScore}</span>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>
