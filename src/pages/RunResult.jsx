@@ -6,51 +6,31 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import TrajectoryMessages from '../components/TrajectoryMessages';
 import ReviewerResults from '../components/ReviewerResults';
-import { useState, useEffect } from 'react';
 
 const RunResult = () => {
   const { id } = useParams();
   const { data: run, isLoading: runLoading, error: runError } = useRun(id);
   const { data: results, isLoading: resultsLoading, error: resultsError } = useRunResults(id);
-  const [scoreData, setScoreData] = useState([]);
-
-  useEffect(() => {
-    const processResults = async () => {
-      if (results) {
-        const processedResults = await Promise.all(
-          results.map(async (result) => {
-            const { data: reviewer } = await useReviewer(result.reviewer_id);
-            return {
-              ...result,
-              dimension: reviewer?.dimension || 'Unknown'
-            };
-          })
-        );
-
-        const averageScores = processedResults.reduce((acc, result) => {
-          if (!acc[result.dimension]) {
-            acc[result.dimension] = { total: 0, count: 0 };
-          }
-          acc[result.dimension].total += result.result.score;
-          acc[result.dimension].count += 1;
-          return acc;
-        }, {});
-
-        const newScoreData = Object.entries(averageScores).map(([dimension, { total, count }]) => ({
-          dimension,
-          averageScore: parseFloat((total / count).toFixed(1))
-        }));
-
-        setScoreData(newScoreData);
-      }
-    };
-
-    processResults();
-  }, [results]);
 
   if (runLoading || resultsLoading) return <div>Loading...</div>;
   if (runError) return <div>Error loading run: {runError.message}</div>;
   if (resultsError) return <div>Error loading results: {resultsError.message}</div>;
+
+  const averageScores = results.reduce((acc, result) => {
+    const { data: reviewer } = useReviewer(result.reviewer_id);
+    const dimension = reviewer?.dimension || 'Unknown';
+    if (!acc[dimension]) {
+      acc[dimension] = { total: 0, count: 0 };
+    }
+    acc[dimension].total += result.result.score;
+    acc[dimension].count += 1;
+    return acc;
+  }, {});
+
+  const scoreData = Object.entries(averageScores).map(([dimension, { total, count }]) => ({
+    dimension,
+    averageScore: parseFloat((total / count).toFixed(1))
+  }));
 
   return (
     <div className="flex flex-col min-h-screen">
