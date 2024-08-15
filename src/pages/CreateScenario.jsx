@@ -9,14 +9,10 @@ const CreateScenario = () => {
   const navigate = useNavigate();
   const {
     scenario,
-    reviewers,
     handleScenarioChange,
     handleLLMTemperatureChange,
     handleSubmit,
     setScenario,
-    handleAddReviewer,
-    handleReviewerChange,
-    handleDeleteReviewer,
   } = useCreateScenarioForm();
 
   const { generateText, isGenerating } = useGenerateText();
@@ -50,10 +46,6 @@ const CreateScenario = () => {
             handleGenerateDescription={handleGenerateDescription}
             handleGeneratePrompt={handleGeneratePrompt}
             isGenerating={isGenerating}
-            reviewers={reviewers}
-            handleAddReviewer={handleAddReviewer}
-            handleReviewerChange={handleReviewerChange}
-            handleDeleteReviewer={handleDeleteReviewer}
           />
 
           <Button type="submit" className="w-full mt-8">Create Scenario</Button>

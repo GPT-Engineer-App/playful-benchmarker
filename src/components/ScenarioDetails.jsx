@@ -3,8 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
-import { Wand2, Plus } from "lucide-react";
-import ReviewerDetails from "./ReviewerDetails";
+import { Wand2 } from "lucide-react";
 
 const ScenarioDetails = ({ 
   scenario, 
@@ -13,11 +12,7 @@ const ScenarioDetails = ({
   handleGenerateName,
   handleGenerateDescription,
   handleGeneratePrompt,
-  isGenerating,
-  reviewers,
-  handleAddReviewer,
-  handleReviewerChange,
-  handleDeleteReviewer
+  isGenerating
 }) => (
   <div className="space-y-4">
     <h2 className="text-2xl font-bold">Scenario Details</h2>
@@ -93,22 +88,6 @@ const ScenarioDetails = ({
         min="0"
         placeholder="300"
       />
-    </div>
-    <div>
-      <h3 className="text-xl font-semibold mb-2">Reviewers</h3>
-      <Button onClick={handleAddReviewer} className="mb-4">
-        <Plus className="w-4 h-4 mr-2" />
-        Add Reviewer
-      </Button>
-      {reviewers.map((reviewer, index) => (
-        <ReviewerDetails
-          key={index}
-          reviewer={reviewer}
-          index={index}
-          handleReviewerChange={handleReviewerChange}
-          handleDeleteReviewer={handleDeleteReviewer}
-        />
-      ))}
     </div>
   </div>
 );
