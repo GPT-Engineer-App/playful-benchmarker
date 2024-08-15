@@ -74,7 +74,7 @@ const RunsList = () => {
               <TableCell>{new Date(run.created_at).toLocaleString()}</TableCell>
               <TableCell>{run.system_version}</TableCell>
               <TableCell>{run.project_id}</TableCell>
-              <TableCell>{run.state}</TableCell>
+              <TableCell>{run.state === 'done' ? 'Completed' : run.state}</TableCell>
               <TableCell>
                 <div className="flex space-x-2">
                   <Button variant="outline" size="sm" onClick={() => handleViewResults(run.id)}>
