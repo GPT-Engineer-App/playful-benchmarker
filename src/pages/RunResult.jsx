@@ -1,20 +1,17 @@
 import { useParams } from 'react-router-dom';
-import { useRun, useResults } from '../integrations/supabase';
+import { useRun } from '../integrations/supabase';
 import Navbar from "../components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import TrajectoryMessages from '../components/TrajectoryMessages';
-import ReviewerResults from '../components/ReviewerResults';
 
 const RunResult = () => {
   const { id } = useParams();
-  const { data: run, isLoading: isLoadingRun, error: runError } = useRun(id);
-  const { data: results, isLoading: isLoadingResults, error: resultsError } = useResults(id);
+  const { data: run, isLoading, error } = useRun(id);
 
-  if (isLoadingRun || isLoadingResults) return <div>Loading...</div>;
-  if (runError) return <div>Error loading run: {runError.message}</div>;
-  if (resultsError) return <div>Error loading results: {resultsError.message}</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error.message}</div>;
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -43,7 +40,6 @@ const RunResult = () => {
           </CardContent>
         </Card>
         <TrajectoryMessages runId={id} />
-        <ReviewerResults results={results} />
       </main>
     </div>
   );
