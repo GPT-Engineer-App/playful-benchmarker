@@ -297,6 +297,12 @@ export const useResults = () => useQuery({
     queryFn: () => fromSupabase(supabase.from('results').select('*')),
 });
 
+export const useRunResults = (runId) => useQuery({
+    queryKey: ['results', runId],
+    queryFn: () => fromSupabase(supabase.from('results').select('*').eq('run_id', runId)),
+    enabled: !!runId,
+});
+
 export const useResult = (id) => useQuery({
     queryKey: ['results', id],
     queryFn: () => fromSupabase(supabase.from('results').select('*').eq('id', id).single()),
