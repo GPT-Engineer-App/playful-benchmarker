@@ -15,18 +15,24 @@ const RunResult = () => {
   const [scoreData, setScoreData] = useState([]);
 
   useEffect(() => {
-    if (results) {
-      const fetchReviewers = async () => {
-        const reviewerPromises = results.map(result => useReviewer(result.reviewer_id));
-        const reviewers = await Promise.all(reviewerPromises);
-        
-        const averageScores = results.reduce((acc, result, index) => {
-          const dimension = reviewers[index]?.data?.dimension || 'Unknown';
-          if (!acc[dimension]) {
-            acc[dimension] = { total: 0, count: 0 };
+    const processResults = async () => {
+      if (results) {
+        const processedResults = await Promise.all(
+          results.map(async (result) => {
+            const { data: reviewer } = await useReviewer(result.reviewer_id);
+            return {
+              ...result,
+              dimension: reviewer?.dimension || 'Unknown'
+            };
+          })
+        );
+
+        const averageScores = processedResults.reduce((acc, result) => {
+          if (!acc[result.dimension]) {
+            acc[result.dimension] = { total: 0, count: 0 };
           }
-          acc[dimension].total += result.result.score;
-          acc[dimension].count += 1;
+          acc[result.dimension].total += result.result.score;
+          acc[result.dimension].count += 1;
           return acc;
         }, {});
 
@@ -36,10 +42,10 @@ const RunResult = () => {
         }));
 
         setScoreData(newScoreData);
-      };
+      }
+    };
 
-      fetchReviewers();
-    }
+    processResults();
   }, [results]);
 
   if (runLoading || resultsLoading) return <div>Loading...</div>;
