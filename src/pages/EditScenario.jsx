@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import ScenarioDetails from "../components/ScenarioDetails";
 import useCreateScenarioForm from "../hooks/useCreateScenarioForm";
-import { useBenchmarkScenario, useUpdateBenchmarkScenario } from "../integrations/supabase";
+import { useBenchmarkScenario, useUpdateBenchmarkScenario, useReviewDimensions, useScenarioReviewers } from "../integrations/supabase";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 
@@ -11,13 +11,21 @@ const EditScenario = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { data: scenarioData, isLoading: isLoadingScenario } = useBenchmarkScenario(id);
+  const { data: scenarioReviewers, isLoading: isLoadingReviewers } = useScenarioReviewers(id);
   const updateScenario = useUpdateBenchmarkScenario();
+  const { data: reviewDimensions, isLoading: isLoadingDimensions } = useReviewDimensions();
 
   const {
     scenario,
     handleScenarioChange,
     handleLLMTemperatureChange,
     setScenario,
+    reviewers,
+    setReviewers,
+    handleAddReviewer,
+    handleReviewerChange,
+    handleDeleteReviewer,
+    handleSubmit: handleFormSubmit,
   } = useCreateScenarioForm();
 
   useEffect(() => {
@@ -26,10 +34,16 @@ const EditScenario = () => {
     }
   }, [scenarioData, setScenario]);
 
+  useEffect(() => {
+    if (scenarioReviewers) {
+      setReviewers(scenarioReviewers.map(sr => sr.reviewers));
+    }
+  }, [scenarioReviewers, setReviewers]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await updateScenario.mutateAsync({ id, ...scenario });
+      await handleFormSubmit(e);
       toast.success("Scenario updated successfully");
       navigate("/");
     } catch (error) {
@@ -37,7 +51,7 @@ const EditScenario = () => {
     }
   };
 
-  if (isLoadingScenario) {
+  if (isLoadingScenario || isLoadingReviewers) {
     return <div>Loading...</div>;
   }
 
@@ -51,6 +65,12 @@ const EditScenario = () => {
             scenario={scenario}
             handleScenarioChange={handleScenarioChange}
             handleLLMTemperatureChange={handleLLMTemperatureChange}
+            reviewers={reviewers}
+            handleAddReviewer={handleAddReviewer}
+            handleReviewerChange={handleReviewerChange}
+            handleDeleteReviewer={handleDeleteReviewer}
+            reviewDimensions={reviewDimensions}
+            isLoadingDimensions={isLoadingDimensions}
           />
 
           <Button type="submit" className="w-full">Update Scenario</Button>
