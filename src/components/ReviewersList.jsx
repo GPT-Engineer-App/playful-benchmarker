@@ -1,6 +1,8 @@
 import { useReviewers } from "../integrations/supabase";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const ReviewersList = () => {
   const { data: reviewers, isLoading, error } = useReviewers();
@@ -21,6 +23,7 @@ const ReviewersList = () => {
               <TableHead>Description</TableHead>
               <TableHead>Weight</TableHead>
               <TableHead>LLM Temperature</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -30,6 +33,11 @@ const ReviewersList = () => {
                 <TableCell>{reviewer.description}</TableCell>
                 <TableCell>{reviewer.weight}</TableCell>
                 <TableCell>{reviewer.llm_temperature}</TableCell>
+                <TableCell>
+                  <Button asChild size="sm">
+                    <Link to={`/edit-reviewer/${reviewer.id}`}>Edit</Link>
+                  </Button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

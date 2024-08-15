@@ -10,6 +10,7 @@ import EditScenario from "./pages/EditScenario.jsx";
 import StartBenchmark from "./pages/StartBenchmark.jsx";
 import CreateReviewer from "./pages/CreateReviewer.jsx";
 import RunResult from "./pages/RunResult.jsx";
+import EditReviewer from "./pages/EditReviewer.jsx";
 
 export const navItems = [
   {
@@ -77,5 +78,11 @@ export const navItems = [
     to: "/run-results/:id",
     icon: <FileText className="h-4 w-4" />,
     page: <RunResult />,
+  },
+  {
+    title: "Edit Reviewer",
+    to: "/edit-reviewer/:id",
+    icon: <Edit className="h-4 w-4" />,
+    page: <EditReviewer />,
   },
 ];
