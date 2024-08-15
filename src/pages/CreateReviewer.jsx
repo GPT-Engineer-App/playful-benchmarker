@@ -5,14 +5,12 @@ import { useAddReviewer, useReviewDimensions } from "../integrations/supabase";
 import { toast } from "sonner";
 import Navbar from "../components/Navbar";
 import ReviewerForm from "../components/ReviewerForm";
-import { Button } from "@/components/ui/button";
 
 const CreateReviewer = () => {
   const navigate = useNavigate();
   const { session } = useSupabaseAuth();
   const addReviewer = useAddReviewer();
   const { data: reviewDimensions, isLoading: isLoadingDimensions } = useReviewDimensions();
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [reviewer, setReviewer] = useState({
     dimension: "",
@@ -27,7 +25,7 @@ const CreateReviewer = () => {
     const { name, value } = e.target;
     setReviewer((prev) => ({ 
       ...prev, 
-      [name]: name === 'weight' || name === 'run_count' ? parseInt(value, 10) : value 
+      [name]: name === 'weight' ? parseInt(value, 10) : value 
     }));
   };
 
@@ -50,17 +48,12 @@ const CreateReviewer = () => {
       return;
     }
 
-    setIsSubmitting(true);
     try {
-      console.log("Submitting reviewer:", reviewer);
       await addReviewer.mutateAsync(reviewer);
       toast.success("Reviewer created successfully");
       navigate("/");
     } catch (error) {
-      console.error("Error creating reviewer:", error);
-      toast.error(`Failed to create reviewer: ${error.message}`);
-    } finally {
-      setIsSubmitting(false);
+      toast.error("Failed to create reviewer: " + error.message);
     }
   };
 
@@ -70,19 +63,16 @@ const CreateReviewer = () => {
 
       <main className="flex-grow container mx-auto px-4 py-8">
         <h2 className="text-2xl font-bold mb-4">Create New Reviewer</h2>
-        <form onSubmit={handleSubmit}>
-          <ReviewerForm
-            reviewer={reviewer}
-            reviewDimensions={reviewDimensions}
-            isLoadingDimensions={isLoadingDimensions}
-            handleReviewerChange={handleReviewerChange}
-            handleReviewerDimensionChange={handleReviewerDimensionChange}
-            handleReviewerLLMTemperatureChange={handleReviewerLLMTemperatureChange}
-          />
-          <Button type="submit" className="w-full mt-4" disabled={isSubmitting}>
-            {isSubmitting ? "Creating..." : "Create Reviewer"}
-          </Button>
-        </form>
+        <ReviewerForm
+          reviewer={reviewer}
+          reviewDimensions={reviewDimensions}
+          isLoadingDimensions={isLoadingDimensions}
+          handleReviewerChange={handleReviewerChange}
+          handleReviewerDimensionChange={handleReviewerDimensionChange}
+          handleReviewerLLMTemperatureChange={handleReviewerLLMTemperatureChange}
+          handleSubmit={handleSubmit}
+          submitButtonText="Create Reviewer"
+        />
       </main>
     </div>
   );
