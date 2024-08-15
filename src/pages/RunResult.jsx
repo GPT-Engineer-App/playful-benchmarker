@@ -7,13 +7,6 @@ import { ExternalLink } from "lucide-react";
 import TrajectoryMessages from '../components/TrajectoryMessages';
 import ReviewerResults from '../components/ReviewerResults';
 
-const getScoreColor = (score) => {
-  if (score >= 8) return 'bg-green-500';
-  if (score >= 6) return 'bg-yellow-500';
-  if (score >= 4) return 'bg-orange-500';
-  return 'bg-red-500';
-};
-
 const RunResult = () => {
   const { id } = useParams();
   const { data: run, isLoading: runLoading, error: runError } = useRun(id);
@@ -36,7 +29,7 @@ const RunResult = () => {
 
   const scoreData = Object.entries(averageScores).map(([dimension, { total, count }]) => ({
     dimension,
-    averageScore: (total / count).toFixed(2)
+    averageScore: parseFloat((total / count).toFixed(1))
   }));
 
   return (
@@ -73,14 +66,19 @@ const RunResult = () => {
           <CardContent>
             <div className="space-y-4">
               {scoreData.map(({ dimension, averageScore }) => (
-                <div key={dimension} className="flex items-center">
+                <div key={dimension} className="flex items-center space-x-4">
                   <div className="w-1/4 font-semibold">{dimension}</div>
                   <div className="w-3/4 flex items-center">
-                    <div 
-                      className={`h-6 ${getScoreColor(averageScore)}`} 
-                      style={{ width: `${averageScore * 10}%` }}
-                    ></div>
-                    <span className="ml-2">{averageScore}</span>
+                    <div className="w-full h-6 relative bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full">
+                      <div 
+                        className="absolute top-full left-0 w-0 h-0 
+                        border-l-[6px] border-l-transparent
+                        border-r-[6px] border-r-transparent
+                        border-b-[8px] border-b-black"
+                        style={{ left: `calc(${averageScore * 10}% - 6px)` }}
+                      ></div>
+                    </div>
+                    <span className="ml-2 font-bold">{averageScore.toFixed(1)}</span>
                   </div>
                 </div>
               ))}
