@@ -17,6 +17,7 @@ export const useSingleIteration = (updateRun) => {
   const runReviewer = async (runId, reviewer, gptEngineerTestToken) => {
     let reviewerResult;
     let testResults = [];
+    let allMessages = [];
     
     while (true) {
       const { data: messages } = await supabase
@@ -25,7 +26,7 @@ export const useSingleIteration = (updateRun) => {
         .eq('run_id', runId)
         .order('created_at', { ascending: true });
 
-      const allMessages = [
+      const currentMessages = [
         ...messages.map(msg => ({
           role: msg.role === 'impersonator' ? 'assistant' : 'user',
           content: msg.content
@@ -39,9 +40,11 @@ export const useSingleIteration = (updateRun) => {
       reviewerResult = await callSupabaseLLM(
         reviewerPrompt,
         reviewer.prompt,
-        allMessages,
+        currentMessages,
         reviewer.llm_temperature
       );
+
+      allMessages.push({ role: 'assistant', content: reviewerResult });
 
       const testMatch = reviewerResult.match(/<lov-test-website>(.*?)<\/lov-test-website>/s);
       if (testMatch) {
@@ -54,6 +57,7 @@ export const useSingleIteration = (updateRun) => {
         
         const testResult = await testWebsite(run.project_id, testInstructions, gptEngineerTestToken);
         testResults.push(testResult);
+        allMessages.push({ role: 'user', content: JSON.stringify(testResult) });
       } else {
         break;
       }
@@ -65,7 +69,10 @@ export const useSingleIteration = (updateRun) => {
       await supabase.from('results').insert({
         run_id: runId,
         reviewer_id: reviewer.id,
-        score: score
+        result: {
+          score: score,
+          messages: allMessages
+        }
       });
     } else {
       console.error(`Reviewer ${reviewer.id} did not provide a valid score`);

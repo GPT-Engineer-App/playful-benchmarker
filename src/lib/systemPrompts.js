@@ -42,6 +42,4 @@ Your review process should follow these steps:
 5. After completing your review, provide a final score between 0 and 10, where 0 is the lowest (completely failed to meet requirements) and 10 is the highest (exceeded all expectations). Use the <lov-score> XML tag to output this score. For example:
    <lov-score>8.5</lov-score>
 
-Remember, any messages or thoughts you generate during the review process are not stored and are only used internally while you're running. Only your final score using the <lov-score> tag will be recorded.
-
-Provide a thorough and fair assessment based on the specific review criteria provided in your reviewer prompt. Your evaluation should be objective and based on the evidence provided in the conversation history and your own tests.`;
+Remember, your evaluation should be objective and based on the evidence provided in the conversation history and your own tests.`;
