@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
 import TrajectoryMessages from '../components/TrajectoryMessages';
 import ReviewerResults from '../components/ReviewerResults';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const RunResult = () => {
   const { id } = useParams();
@@ -15,6 +16,21 @@ const RunResult = () => {
   if (runLoading || resultsLoading) return <div>Loading...</div>;
   if (runError) return <div>Error loading run: {runError.message}</div>;
   if (resultsError) return <div>Error loading results: {resultsError.message}</div>;
+
+  const averageScores = results.reduce((acc, result) => {
+    const dimension = result.reviewer.dimension;
+    if (!acc[dimension]) {
+      acc[dimension] = { total: 0, count: 0 };
+    }
+    acc[dimension].total += result.result.score;
+    acc[dimension].count += 1;
+    return acc;
+  }, {});
+
+  const chartData = Object.entries(averageScores).map(([dimension, { total, count }]) => ({
+    dimension,
+    averageScore: total / count
+  }));
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -42,6 +58,26 @@ const RunResult = () => {
             )}
           </CardContent>
         </Card>
+
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle>Average Scores by Dimension</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="dimension" />
+                  <YAxis domain={[0, 10]} />
+                  <Tooltip />
+                  <Bar dataKey="averageScore" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+
         <TrajectoryMessages runId={id} />
         {results && results.length > 0 && <ReviewerResults results={results} />}
       </main>
