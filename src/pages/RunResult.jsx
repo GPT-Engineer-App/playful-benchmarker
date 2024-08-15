@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useRun, useRunResults } from '../integrations/supabase';
+import { useRun, useRunResults, useReviewer } from '../integrations/supabase';
 import Navbar from "../components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,8 @@ const RunResult = () => {
   if (resultsError) return <div>Error loading results: {resultsError.message}</div>;
 
   const averageScores = results.reduce((acc, result) => {
-    const dimension = result.reviewer.dimension;
+    const { data: reviewer } = useReviewer(result.reviewer_id);
+    const dimension = reviewer?.dimension || 'Unknown';
     if (!acc[dimension]) {
       acc[dimension] = { total: 0, count: 0 };
     }
