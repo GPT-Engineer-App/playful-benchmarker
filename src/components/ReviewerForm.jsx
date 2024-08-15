@@ -5,7 +5,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectSe
 import { Slider } from "@/components/ui/slider";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 const ReviewerForm = ({ 
   reviewer, 
@@ -14,8 +13,6 @@ const ReviewerForm = ({
   handleReviewerChange, 
   handleReviewerDimensionChange, 
   handleReviewerLLMTemperatureChange,
-  submitButtonText,
-  onSubmit
 }) => (
   <div className="space-y-4">
     <div>
@@ -111,7 +108,17 @@ const ReviewerForm = ({
         required
       />
     </div>
-    <Button onClick={onSubmit} className="w-full">{submitButtonText}</Button>
+    <div>
+      <Label htmlFor="llm_model">LLM Model</Label>
+      <Input
+        id="llm_model"
+        name="llm_model"
+        type="text"
+        value={reviewer.llm_model}
+        onChange={handleReviewerChange}
+        required
+      />
+    </div>
   </div>
 );
 
