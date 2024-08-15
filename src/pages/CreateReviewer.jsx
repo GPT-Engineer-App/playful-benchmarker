@@ -70,7 +70,7 @@ const CreateReviewer = () => {
           handleReviewerChange={handleReviewerChange}
           handleReviewerDimensionChange={handleReviewerDimensionChange}
           handleReviewerLLMTemperatureChange={handleReviewerLLMTemperatureChange}
-          handleSubmit={handleSubmit}
+          onSubmit={handleSubmit}
           submitButtonText="Create Reviewer"
         />
       </main>
