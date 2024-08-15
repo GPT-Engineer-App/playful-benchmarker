@@ -20,6 +20,8 @@ const useCreateScenarioForm = () => {
     };
   });
 
+  const [selectedReviewers, setSelectedReviewers] = useState([]);
+
   const saveDraft = useCallback(() => {
     localStorage.setItem('draftScenario', JSON.stringify(scenario));
   }, [scenario]);
@@ -41,6 +43,14 @@ const useCreateScenarioForm = () => {
     setScenario((prev) => ({ ...prev, llm_temperature: value[0] }));
   };
 
+  const handleReviewerSelection = (reviewerId, isSelected) => {
+    setSelectedReviewers(prev => 
+      isSelected 
+        ? [...prev, reviewerId]
+        : prev.filter(id => id !== reviewerId)
+    );
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!session) {
@@ -50,7 +60,7 @@ const useCreateScenarioForm = () => {
 
     try {
       console.log("Attempting to create scenario:", scenario);
-      const result = await addBenchmarkScenario.mutateAsync(scenario);
+      const result = await addBenchmarkScenario.mutateAsync({ ...scenario, reviewers: selectedReviewers });
       console.log("Scenario creation response:", result);
       
       if (result.error) {
@@ -81,6 +91,9 @@ const useCreateScenarioForm = () => {
     handleLLMTemperatureChange,
     handleSubmit,
     setScenario,
+    selectedReviewers,
+    setSelectedReviewers,
+    handleReviewerSelection,
   };
 };
 

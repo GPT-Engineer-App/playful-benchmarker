@@ -4,6 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Wand2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const ScenarioDetails = ({ 
   scenario, 
@@ -12,7 +13,10 @@ const ScenarioDetails = ({
   handleGenerateName,
   handleGenerateDescription,
   handleGeneratePrompt,
-  isGenerating
+  isGenerating,
+  availableReviewers,
+  selectedReviewers,
+  handleReviewerSelection
 }) => (
   <div className="space-y-4">
     <h2 className="text-2xl font-bold">Scenario Details</h2>
@@ -88,6 +92,21 @@ const ScenarioDetails = ({
         min="0"
         placeholder="300"
       />
+    </div>
+    <div>
+      <Label>Reviewers</Label>
+      <div className="space-y-2 mt-2">
+        {availableReviewers.map((reviewer) => (
+          <div key={reviewer.id} className="flex items-center space-x-2">
+            <Checkbox
+              id={`reviewer-${reviewer.id}`}
+              checked={selectedReviewers.includes(reviewer.id)}
+              onCheckedChange={(checked) => handleReviewerSelection(reviewer.id, checked)}
+            />
+            <Label htmlFor={`reviewer-${reviewer.id}`}>{reviewer.dimension}</Label>
+          </div>
+        ))}
+      </div>
     </div>
   </div>
 );
