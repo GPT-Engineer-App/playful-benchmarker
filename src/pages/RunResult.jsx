@@ -69,7 +69,12 @@ const RunResult = () => {
                 <div key={dimension} className="flex items-center space-x-4">
                   <div className="w-1/4 font-semibold">{dimension}</div>
                   <div className="w-3/4 flex items-center">
-                    <div className="w-full h-6 relative bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full">
+                    <div className="w-full h-6 relative rounded-full overflow-hidden">
+                      <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"></div>
+                      <div 
+                        className="absolute inset-0 bg-black opacity-50"
+                        style={{ clipPath: `inset(0 0 0 ${averageScore * 10}%)` }}
+                      ></div>
                       <div 
                         className="absolute top-full left-0 w-0 h-0 
                         border-l-[6px] border-l-transparent
