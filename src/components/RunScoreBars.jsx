@@ -27,7 +27,7 @@ const RunScoreBars = ({ runId }) => {
   }, [results, reviewers]);
 
   if (resultsLoading || reviewersLoading) {
-    return <div className="h-6 bg-gray-200 animate-pulse rounded"></div>;
+    return <div className="h-3 bg-gray-200 animate-pulse rounded"></div>;
   }
 
   if (!results || !reviewers) {
@@ -35,18 +35,21 @@ const RunScoreBars = ({ runId }) => {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       {averageScores.map(({ dimension, score }, index) => (
         <TooltipProvider key={index}>
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center space-x-2">
-                <div className="text-sm w-1/3 truncate text-gray-700">{dimension}:</div>
-                <div className="w-2/3 h-6 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"
-                    style={{ width: `${score * 10}%` }}
-                  ></div>
+                <div className="text-xs w-1/3 truncate text-gray-700">{dimension}:</div>
+                <div className="w-2/3 flex items-center">
+                  <div className="w-2/3 h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"
+                      style={{ width: `${score * 10}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xs ml-2">{score.toFixed(1)}</span>
                 </div>
               </div>
             </TooltipTrigger>
