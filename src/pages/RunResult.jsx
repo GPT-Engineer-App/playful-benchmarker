@@ -7,6 +7,7 @@ import { ExternalLink } from "lucide-react";
 import TrajectoryMessages from '../components/TrajectoryMessages';
 import ReviewerResults from '../components/ReviewerResults';
 import { useMemo } from 'react';
+import { getScoreColor } from '../lib/utils';
 
 const RunResult = () => {
   const { id } = useParams();
@@ -78,7 +79,7 @@ const RunResult = () => {
                   <div className="flex items-center space-x-4">
                     <div className="relative w-64 h-6 bg-gray-200 rounded-full overflow-hidden">
                       <div 
-                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full"
+                        className={`absolute inset-y-0 left-0 ${getScoreColor(averageScore)} rounded-full`}
                         style={{ width: `${averageScore * 10}%` }}
                       ></div>
                     </div>

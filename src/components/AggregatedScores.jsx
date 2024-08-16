@@ -2,14 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const getScoreColor = (score) => {
-  if (score < 3) return 'bg-red-500';
-  if (score < 5) return 'bg-orange-500';
-  if (score < 7) return 'bg-yellow-500';
-  if (score < 9) return 'bg-lime-500';
-  return 'bg-green-500';
-};
+import { getScoreColor } from '../lib/utils';
 
 const AggregatedScores = () => {
   const { data: aggregatedScores, isLoading, error } = useQuery({

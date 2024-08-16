@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { useRunResults, useRunReviewers } from "../integrations/supabase";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { getScoreColor } from '../lib/utils';
 
 const RunScoreBars = ({ runId }) => {
   const { data: results, isLoading: resultsLoading } = useRunResults(runId);
@@ -45,7 +46,7 @@ const RunScoreBars = ({ runId }) => {
                 <div className="w-2/3 flex items-center">
                   <div className="w-2/3 h-3 bg-gray-200 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"
+                      className={`h-full ${getScoreColor(score)}`}
                       style={{ width: `${score * 10}%` }}
                     ></div>
                   </div>
