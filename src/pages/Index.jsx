@@ -5,6 +5,7 @@ import { useBenchmarkScenarios, useRuns, useReviewers } from "../integrations/su
 import ScenarioList from "../components/ScenarioList";
 import RunsList from "../components/RunsList";
 import ReviewersList from "../components/ReviewersList";
+import AggregatedScores from "../components/AggregatedScores";
 import Navbar from "../components/Navbar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlusCircle, PlayCircle, BarChart2, Settings, Users } from "lucide-react";
@@ -101,6 +102,7 @@ const Index = () => {
               </CardContent>
             </Card>
 
+            <AggregatedScores />
             <ReviewersList />
           </div>
         ) : (
