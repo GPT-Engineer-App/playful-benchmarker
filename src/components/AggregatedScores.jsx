@@ -3,6 +3,14 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../integrations/supabase';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+const getScoreColor = (score) => {
+  if (score < 3) return 'bg-red-500';
+  if (score < 5) return 'bg-orange-500';
+  if (score < 7) return 'bg-yellow-500';
+  if (score < 9) return 'bg-lime-500';
+  return 'bg-green-500';
+};
+
 const AggregatedScores = () => {
   const { data: aggregatedScores, isLoading, error } = useQuery({
     queryKey: ['aggregatedScores'],
@@ -49,7 +57,7 @@ const AggregatedScores = () => {
               <div className="w-2/3 flex items-center">
                 <div className="w-2/3 h-3 bg-gray-200 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"
+                    className={`h-full ${getScoreColor(averageScore)}`}
                     style={{ width: `${averageScore * 10}%` }}
                   ></div>
                 </div>
