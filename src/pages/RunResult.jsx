@@ -71,26 +71,21 @@ const RunResult = () => {
             <CardTitle>Average Scores by Dimension</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-6">
               {scoreData.map(({ dimension, averageScore }) => (
-                <div key={dimension} className="flex items-center space-x-4">
-                  <div className="w-1/4 font-semibold">{dimension}</div>
-                  <div className="w-3/4 flex items-center">
-                    <div className="w-full h-6 relative rounded-full overflow-hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"></div>
-                      <div 
-                        className="absolute inset-0 bg-black opacity-50"
-                        style={{ clipPath: `inset(0 0 0 ${averageScore * 10}%)` }}
-                      ></div>
-                      <div 
-                        className="absolute top-full left-0 w-0 h-0 
-                        border-l-[6px] border-l-transparent
-                        border-r-[6px] border-r-transparent
-                        border-b-[8px] border-b-black"
-                        style={{ left: `calc(${averageScore * 10}% - 6px)` }}
-                      ></div>
+                <div key={dimension} className="space-y-2">
+                  <div className="font-semibold">{dimension}</div>
+                  <div className="relative h-8 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full"
+                      style={{ width: `${averageScore * 10}%` }}
+                    ></div>
+                    <div 
+                      className="absolute inset-y-0 right-0 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md transform -translate-x-1/2"
+                      style={{ left: `${averageScore * 10}%` }}
+                    >
+                      <span className="text-sm font-bold">{averageScore.toFixed(1)}</span>
                     </div>
-                    <span className="ml-2 font-bold">{averageScore.toFixed(1)}</span>
                   </div>
                 </div>
               ))}
