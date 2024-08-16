@@ -82,11 +82,9 @@ const RunResult = () => {
                         style={{ width: `${averageScore * 10}%` }}
                       ></div>
                       <div 
-                        className="absolute inset-y-0 right-0 flex items-center justify-center w-6 h-6 bg-white rounded-full shadow-md transform -translate-x-1/2"
+                        className="absolute inset-y-0 right-0 w-6 h-6 bg-white rounded-full shadow-md transform -translate-x-1/2"
                         style={{ left: `${averageScore * 10}%` }}
-                      >
-                        <span className="text-xs font-bold">{averageScore.toFixed(1)}</span>
-                      </div>
+                      ></div>
                     </div>
                     <span className="text-sm font-medium">{averageScore.toFixed(1)}</span>
                   </div>
