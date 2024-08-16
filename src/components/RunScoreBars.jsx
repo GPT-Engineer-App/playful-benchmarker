@@ -41,8 +41,8 @@ const RunScoreBars = ({ runId }) => {
           <Tooltip>
             <TooltipTrigger asChild>
               <div className="flex items-center space-x-2">
-                <div className="text-sm w-48 truncate text-gray-700">{dimension}:</div>
-                <div className="flex-grow h-6 bg-gray-200 rounded-full overflow-hidden">
+                <div className="text-sm w-1/3 truncate text-gray-700">{dimension}:</div>
+                <div className="w-2/3 h-6 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500"
                     style={{ width: `${score * 10}%` }}

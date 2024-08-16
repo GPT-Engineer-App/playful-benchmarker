@@ -53,7 +53,7 @@ const RunsList = () => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="cursor-pointer" onClick={() => handleSort("created_at")}>
+            <TableHead className="cursor-pointer w-1/3" onClick={() => handleSort("created_at")}>
               Date {sortField === "created_at" && (sortDirection === "asc" ? <ChevronUp className="inline" /> : <ChevronDown className="inline" />)}
             </TableHead>
             <TableHead className="cursor-pointer" onClick={() => handleSort("system_version")}>
