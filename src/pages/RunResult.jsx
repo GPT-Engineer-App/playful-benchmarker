@@ -81,10 +81,6 @@ const RunResult = () => {
                         className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full"
                         style={{ width: `${averageScore * 10}%` }}
                       ></div>
-                      <div 
-                        className="absolute inset-y-0 right-0 w-6 h-6 bg-white rounded-full shadow-md transform -translate-x-1/2"
-                        style={{ left: `${averageScore * 10}%` }}
-                      ></div>
                     </div>
                     <span className="text-sm font-medium">{averageScore.toFixed(1)}</span>
                   </div>
