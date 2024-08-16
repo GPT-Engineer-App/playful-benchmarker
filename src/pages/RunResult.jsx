@@ -73,18 +73,20 @@ const RunResult = () => {
           <CardContent>
             <div className="space-y-6">
               {scoreData.map(({ dimension, averageScore }) => (
-                <div key={dimension} className="space-y-2">
+                <div key={dimension} className="space-y-1">
                   <div className="font-semibold">{dimension}</div>
-                  <div className="relative h-8 bg-gray-200 rounded-full overflow-hidden">
-                    <div 
-                      className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full"
-                      style={{ width: `${averageScore * 10}%` }}
-                    ></div>
-                    <div 
-                      className="absolute inset-y-0 right-0 flex items-center justify-center w-8 h-8 bg-white rounded-full shadow-md transform -translate-x-1/2"
-                      style={{ left: `${averageScore * 10}%` }}
-                    >
-                      <span className="text-sm font-bold">{averageScore.toFixed(1)}</span>
+                  <div className="flex items-center space-x-2">
+                    <div className="relative w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full"
+                        style={{ width: `${averageScore * 10}%` }}
+                      ></div>
+                      <div 
+                        className="absolute inset-y-0 right-0 flex items-center justify-center w-6 h-6 bg-white rounded-full shadow-md transform -translate-x-1/2"
+                        style={{ left: `${averageScore * 10}%` }}
+                      >
+                        <span className="text-xs font-bold">{averageScore.toFixed(1)}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
