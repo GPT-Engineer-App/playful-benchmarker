@@ -71,12 +71,12 @@ const RunResult = () => {
             <CardTitle>Average Scores by Dimension</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-6">
+            <div className="space-y-4">
               {scoreData.map(({ dimension, averageScore }) => (
                 <div key={dimension} className="space-y-1">
                   <div className="font-semibold">{dimension}</div>
-                  <div className="flex items-center space-x-2">
-                    <div className="relative w-full h-6 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="flex items-center space-x-4">
+                    <div className="relative w-48 h-6 bg-gray-200 rounded-full overflow-hidden">
                       <div 
                         className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full"
                         style={{ width: `${averageScore * 10}%` }}
@@ -88,6 +88,7 @@ const RunResult = () => {
                         <span className="text-xs font-bold">{averageScore.toFixed(1)}</span>
                       </div>
                     </div>
+                    <span className="text-sm font-medium">{averageScore.toFixed(1)}</span>
                   </div>
                 </div>
               ))}
