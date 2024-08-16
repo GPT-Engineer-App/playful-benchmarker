@@ -76,7 +76,7 @@ const RunResult = () => {
                 <div key={dimension} className="space-y-1">
                   <div className="font-semibold">{dimension}</div>
                   <div className="flex items-center space-x-4">
-                    <div className="relative w-48 h-6 bg-gray-200 rounded-full overflow-hidden">
+                    <div className="relative w-64 h-6 bg-gray-200 rounded-full overflow-hidden">
                       <div 
                         className="absolute inset-y-0 left-0 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-full"
                         style={{ width: `${averageScore * 10}%` }}
