@@ -3,10 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useRuns } from "../integrations/supabase";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { ChevronUp, ChevronDown, Eye, ExternalLink } from "lucide-react";
+import RunScoreBars from "./RunScoreBars";
 
 const RunsList = () => {
   const navigate = useNavigate();
@@ -71,7 +71,12 @@ const RunsList = () => {
         <TableBody>
           {sortedRuns.map((run) => (
             <TableRow key={run.id}>
-              <TableCell>{new Date(run.created_at).toLocaleString()}</TableCell>
+              <TableCell>
+                <div className="space-y-2">
+                  <div>{new Date(run.created_at).toLocaleString()}</div>
+                  <RunScoreBars runId={run.id} />
+                </div>
+              </TableCell>
               <TableCell>{run.system_version}</TableCell>
               <TableCell>{run.project_id}</TableCell>
               <TableCell>{run.state}</TableCell>
