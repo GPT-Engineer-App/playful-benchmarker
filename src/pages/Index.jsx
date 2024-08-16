@@ -64,15 +64,15 @@ const Index = () => {
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
                 </CardHeader>
-                <CardContent className="flex justify-around">
-                  <Button asChild className="flex-1 mr-2" size="sm">
-                    <Link to="/create-scenario" className="flex items-center justify-center">
+                <CardContent className="flex flex-col space-y-2">
+                  <Button asChild size="sm">
+                    <Link to="/create-scenario" className="flex items-center justify-center w-full">
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Create Scenario
                     </Link>
                   </Button>
-                  <Button asChild className="flex-1 ml-2" size="sm">
-                    <Link to="/start-benchmark" className="flex items-center justify-center">
+                  <Button asChild size="sm">
+                    <Link to="/start-benchmark" className="flex items-center justify-center w-full">
                       <PlayCircle className="mr-2 h-4 w-4" />
                       Start Benchmark
                     </Link>
